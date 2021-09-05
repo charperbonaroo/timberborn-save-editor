@@ -37,24 +37,6 @@ export const BeaverUtil = {
           "HomelessRootBehavior 1.00"
         ]
       },
-      GoodCarrier: {},
-      Enterer: {},
-      LifeExpectancyManager: {
-        SumOfLifeExpectancyObservations: 0,
-        NumberOfLifeExpectancyObservations: 0,
-        BaseLifeExpectancy: 0
-      },
-      AttractionAttender: { FirstVisit: false },
-      Dweller: {},
-      Procreator: { LastProcreationTimestamp: 0 },
-      UnreachableHomeUnassigner: { CheckHomeReachability: false },
-      GoodReserver: {},
-      MortalNeeder: { DeathDays: [] },
-      Builder: {},
-      Planter: {},
-      HomelessRootBehavior: {},
-      MortalRootBehavior: {},
-      WanderRootBehavior: { Walked: false }
     });
   }
 }
