@@ -39,7 +39,14 @@ export const BeaverCopier: IEditorPlugin<DemoSave, DemoSave> = {
       const newBeaver = deepCopy(beaver);
       const id = UUID();
       newBeaver.Id = id;
-      newBeaver.Components.BehaviorManager = {};
+      newBeaver.Components.BehaviorManager = {
+        RunningBehaviorId: "HomelessRootBehavior",
+        RunningBehaviorOwner: id,
+        ReturnToBehavior: false,
+        TimestampedBehaviorLog: [
+          "HomelessRootBehavior 1.00"
+        ]
+      };
       if (newBeaver.TemplateName === "BeaverAdult") {
         (newBeaver.Components.Beaver as any).DayOfBirth = dayNumber - 5;
       }
