@@ -5,7 +5,7 @@ import { groupBy, toPairs } from "lodash";
 
 export function PluginIndex({ saveData, onSelectPlugin }: { saveData: DemoSave, onSelectPlugin: (pluginId: string) => void }) {
   const groupedPlugins = useMemo(() => toPairs(groupBy(allPlugins
-    .filter(_ => typeof _.enabled === "function" ? _.enabled(saveData) : _.enabled), "group")), [saveData]);
+    .filter(_ => typeof _.enabled === "function" ? _.enabled({saveData}) : _.enabled), "group")), [saveData]);
 
   return <div className="container">
     {groupedPlugins.map(([groupName, plugins]) => <div key={groupName} className="my-2">

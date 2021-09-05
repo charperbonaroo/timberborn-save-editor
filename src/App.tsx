@@ -10,9 +10,11 @@ function App() {
   const [ saveData, setSaveData ] = useState<DemoSave|null>(null);
 
   return <>
-    <Navbar />
     {saveData === null
-      ? <LoadSaveCard onSaveLoaded={setSaveData} />
+      ? <>
+        <Navbar onHome={() => { /* do nothing */ }} />
+        <LoadSaveCard onSaveLoaded={setSaveData} />
+      </>
       : <SaveContext.Provider value={{saveData}}>
         <SaveEditor saveData={saveData} onSubmit={setSaveData} />
       </SaveContext.Provider>}

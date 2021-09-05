@@ -1,7 +1,10 @@
-export function Navbar() {
+import { DemoSave } from "./DemoSave";
+
+export function Navbar({ saveData, onHome }: { saveData?: DemoSave, onHome: () => void }) {
   return <nav className="navbar navbar-light bg-light">
     <div className="container">
-      <span className="navbar-brand">Timberborn Save Editor</span>
+    {// eslint-disable-next-line
+    }<a href="#" onClick={(e) => { e.preventDefault(); onHome(); }} className="navbar-brand">Timberborn Save Editor</a>
     </div>
   </nav>
 }
