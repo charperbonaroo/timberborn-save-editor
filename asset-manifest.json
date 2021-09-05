@@ -1,20 +1,20 @@
 {
   "files": {
-    "main.css": "/static/css/main.2f2b5a39.chunk.css",
-    "main.js": "/static/js/main.4e4f9c29.chunk.js",
-    "main.js.map": "/static/js/main.4e4f9c29.chunk.js.map",
-    "runtime-main.js": "/static/js/runtime-main.6bde60ca.js",
-    "runtime-main.js.map": "/static/js/runtime-main.6bde60ca.js.map",
-    "static/js/2.1601f885.chunk.js": "/static/js/2.1601f885.chunk.js",
-    "static/js/2.1601f885.chunk.js.map": "/static/js/2.1601f885.chunk.js.map",
-    "static/js/3.699f7930.chunk.js": "/static/js/3.699f7930.chunk.js",
-    "static/js/3.699f7930.chunk.js.map": "/static/js/3.699f7930.chunk.js.map",
-    "index.html": "/index.html",
-    "static/css/main.2f2b5a39.chunk.css.map": "/static/css/main.2f2b5a39.chunk.css.map",
-    "static/js/2.1601f885.chunk.js.LICENSE.txt": "/static/js/2.1601f885.chunk.js.LICENSE.txt"
+    "main.css": "/timberborn-save-editor/static/css/main.2f2b5a39.chunk.css",
+    "main.js": "/timberborn-save-editor/static/js/main.4e4f9c29.chunk.js",
+    "main.js.map": "/timberborn-save-editor/static/js/main.4e4f9c29.chunk.js.map",
+    "runtime-main.js": "/timberborn-save-editor/static/js/runtime-main.9e587413.js",
+    "runtime-main.js.map": "/timberborn-save-editor/static/js/runtime-main.9e587413.js.map",
+    "static/js/2.1601f885.chunk.js": "/timberborn-save-editor/static/js/2.1601f885.chunk.js",
+    "static/js/2.1601f885.chunk.js.map": "/timberborn-save-editor/static/js/2.1601f885.chunk.js.map",
+    "static/js/3.699f7930.chunk.js": "/timberborn-save-editor/static/js/3.699f7930.chunk.js",
+    "static/js/3.699f7930.chunk.js.map": "/timberborn-save-editor/static/js/3.699f7930.chunk.js.map",
+    "index.html": "/timberborn-save-editor/index.html",
+    "static/css/main.2f2b5a39.chunk.css.map": "/timberborn-save-editor/static/css/main.2f2b5a39.chunk.css.map",
+    "static/js/2.1601f885.chunk.js.LICENSE.txt": "/timberborn-save-editor/static/js/2.1601f885.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
-    "static/js/runtime-main.6bde60ca.js",
+    "static/js/runtime-main.9e587413.js",
     "static/js/2.1601f885.chunk.js",
     "static/css/main.2f2b5a39.chunk.css",
     "static/js/main.4e4f9c29.chunk.js"
