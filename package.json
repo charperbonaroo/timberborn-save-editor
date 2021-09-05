@@ -18,6 +18,7 @@
     "web-vitals": "^1.0.1"
   },
   "scripts": {
+    "pages": "yarn build && mv ./build ./docs",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
