@@ -37,6 +37,7 @@ export const BeaverUtil = {
           "HomelessRootBehavior 1.00"
         ]
       },
+      Dweller: {},
       MortalNeeder: { DeathDays: [] },
       Worker: {},
     });
