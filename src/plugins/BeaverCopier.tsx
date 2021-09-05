@@ -62,9 +62,11 @@ export const BeaverCopier: IEditorPlugin<DemoSave, DemoSave> = {
     const hasNextPage = pageSize + offset < beavers.length;
 
     const doSetBeaverCount = useCallback(() => {
-      const newBeavers = beavers.slice(0, targetAmount);
+      const adults = beavers.filter(_ => _.TemplateName === "BeaverAdult");
+      const newBeavers = (adults.length > 0 ? adults : beavers).slice(0, targetAmount);
+      const samples = newBeavers.slice();
       while (newBeavers.length < targetAmount) {
-        newBeavers.push(copyBeaver(sample(beavers)!));
+        newBeavers.push(copyBeaver(sample(samples)!));
       }
       setBeavers(newBeavers);
     }, [beavers, targetAmount, copyBeaver]);
