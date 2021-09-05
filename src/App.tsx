@@ -1,26 +1,22 @@
-import React from 'react';
-import logo from './logo.svg';
+import { useState } from 'react';
 import './App.css';
+import { DemoSave } from './DemoSave';
+import { LoadSaveCard } from './LoadSaveCard';
+import { Navbar } from './Navbar';
+import { SaveContext } from './SaveContext';
+import { SaveEditor } from './SaveEditor';
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+  const [ saveData, setSaveData ] = useState<DemoSave|null>(null);
+
+  return <>
+    <Navbar />
+    {saveData === null
+      ? <LoadSaveCard onSaveLoaded={setSaveData} />
+      : <SaveContext.Provider value={{saveData}}>
+        <SaveEditor saveData={saveData} onSubmit={setSaveData} />
+      </SaveContext.Provider>}
+  </>;
 }
 
 export default App;
