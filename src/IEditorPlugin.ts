@@ -17,6 +17,11 @@ export interface IEditorPlugin<Input, Output> {
   write: (saveData: DemoSave, data: Output) => DemoSave;
 
   /**
+   * Lower number gets placed on top
+   */
+  position: number;
+
+  /**
    * URL-friendly name of this editor plugin
    */
   id: string;

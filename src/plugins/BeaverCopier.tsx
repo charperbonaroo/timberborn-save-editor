@@ -1,14 +1,15 @@
 import { sample, sortBy } from "lodash";
 import { useCallback, useState } from "react";
+import { BeaverUtil } from "../BeaverUtil";
 import { deepCopy } from "../deepCopy";
 import { DemoSave, DemoSaveEntity, UnknownEntity } from "../DemoSave";
 import { IEditorPlugin } from "../IEditorPlugin";
-import { UUID } from "../util/UUID";
 
 export const BeaverCopier: IEditorPlugin<DemoSave, DemoSave> = {
   id: "BeaverCopier",
   name: "Beaver copier",
   group: "Beavers",
+  position: 1,
   enabled: true,
 
   read(saveData) {
@@ -24,8 +25,6 @@ export const BeaverCopier: IEditorPlugin<DemoSave, DemoSave> = {
   },
 
   Editor({ initialData, onClose, onSubmit }) {
-    const names = initialData.Singletons.NameService.Names;
-    const dayNumber = initialData.Singletons.DayNightCycle.DayNumber;
     const [ beavers, setBeavers ] = useState(() => initialData.Entities.filter(_ => _.TemplateName === "BeaverChild" || _.TemplateName === "BeaverAdult"))
     const [ page, setPage ] = useState(0);
     const [ pageSize, setPageSize ] = useState(10);
@@ -37,22 +36,13 @@ export const BeaverCopier: IEditorPlugin<DemoSave, DemoSave> = {
 
     const copyBeaver = useCallback((beaver: UnknownEntity) => {
       const newBeaver = deepCopy(beaver);
-      const id = UUID();
-      newBeaver.Id = id;
-      newBeaver.Components.BehaviorManager = {
-        RunningBehaviorId: "HomelessRootBehavior",
-        RunningBehaviorOwner: id,
-        ReturnToBehavior: false,
-        TimestampedBehaviorLog: [
-          "HomelessRootBehavior 1.00"
-        ]
-      };
+      BeaverUtil.reset(newBeaver);
+      BeaverUtil.setDefaultName(initialData, newBeaver);
       if (newBeaver.TemplateName === "BeaverAdult") {
-        (newBeaver.Components.Beaver as any).DayOfBirth = dayNumber - 5;
+        BeaverUtil.setAge(initialData, beaver, 5)
       }
-      (newBeaver.Components.Beaver as any).Name = sample(names);
       return newBeaver;
-    }, [names, dayNumber]);
+    }, [initialData]);
 
     const duplicate = useCallback((beaver: UnknownEntity) => {
       setBeavers(beavers.slice().concat([copyBeaver(beaver)]));
