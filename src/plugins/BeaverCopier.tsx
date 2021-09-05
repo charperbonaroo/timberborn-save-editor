@@ -25,25 +25,31 @@ export const BeaverCopier: IEditorPlugin<DemoSave, DemoSave> = {
 
   Editor({ initialData, onClose, onSubmit }) {
     const names = initialData.Singletons.NameService.Names;
+    const dayNumber = initialData.Singletons.DayNightCycle.DayNumber;
     const [ beavers, setBeavers ] = useState(() => initialData.Entities.filter(_ => _.TemplateName === "BeaverChild" || _.TemplateName === "BeaverAdult"))
     const [ page, setPage ] = useState(0);
     const [ pageSize, setPageSize ] = useState(10);
-    const [ addRandomAmount, setAddRandomAmount ] = useState(1);
+    const [ targetAmount, setTargetAmount ] = useState(70);
 
     const sortedBeavers = sortBy(beavers.slice(), _ => -(_ as any).Components.Beaver.DayOfBirth);
 
     const offset = page * pageSize;
 
-    const duplicate = useCallback((beaver: UnknownEntity) => {
+    const copyBeaver = useCallback((beaver: UnknownEntity) => {
       const newBeaver = deepCopy(beaver);
       const id = UUID();
       newBeaver.Id = id;
       newBeaver.Components.BehaviorManager = {};
-      (newBeaver.Components as any).Beaver.Name = sample(names);
-      const newBeavers = beavers.slice();
-      newBeavers.push(newBeaver);
-      setBeavers(newBeavers);
-    }, [beavers, setBeavers, names]);
+      if (newBeaver.TemplateName === "BeaverAdult") {
+        (newBeaver.Components.Beaver as any).DayOfBirth = dayNumber - 5;
+      }
+      (newBeaver.Components.Beaver as any).Name = sample(names);
+      return newBeaver;
+    }, [names, dayNumber]);
+
+    const duplicate = useCallback((beaver: UnknownEntity) => {
+      setBeavers(beavers.slice().concat([copyBeaver(beaver)]));
+    }, [beavers, setBeavers, copyBeaver]);
 
     const doSubmit = useCallback(() => {
       const Entities = initialData.Entities
@@ -55,18 +61,13 @@ export const BeaverCopier: IEditorPlugin<DemoSave, DemoSave> = {
 
     const hasNextPage = pageSize + offset < beavers.length;
 
-    const doAddRandomBeavers = useCallback(() => {
-      const newBeavers = beavers.slice();
-      for (let i = 0; i < addRandomAmount; i++) {
-        const newBeaver = deepCopy(sample(beavers)!);
-        const id = UUID();
-        newBeaver.Id = id;
-        newBeaver.Components.BehaviorManager = {};
-        (newBeaver.Components as any).Beaver.Name = sample(names);
-        newBeavers.push(newBeaver);
+    const doSetBeaverCount = useCallback(() => {
+      const newBeavers = beavers.slice(0, targetAmount);
+      while (newBeavers.length < targetAmount) {
+        newBeavers.push(copyBeaver(sample(beavers)!));
       }
       setBeavers(newBeavers);
-    }, [beavers, addRandomAmount, names]);
+    }, [beavers, targetAmount, copyBeaver]);
 
     return <div className="container my-4">
       <div className="card">
@@ -117,11 +118,11 @@ export const BeaverCopier: IEditorPlugin<DemoSave, DemoSave> = {
                   <div className="me-auto">
                     Showing <strong>{offset}</strong> - <strong>{Math.min(beavers.length, offset + pageSize)}</strong> of <strong>{beavers.length}</strong>
                   </div>
-                  <form className="me-3 d-flex" onSubmit={(event) => { event.preventDefault(); doAddRandomBeavers(); }}>
-                    <label className="form-label me-1 mt-1 mb-0" htmlFor="addRandom">Add beaver(s)</label>
-                    <input type="number" id="addRandom" className="form-control form-control-sm" value={addRandomAmount}
-                      onChange={(event) => { setAddRandomAmount(parseInt(event.target.value, 10)) }} width={3} style={{width: 60}} />
-                    <button type="submit" className="ms-1 btn btn-primary btn-sm">Add</button>
+                  <form className="me-3 d-flex" onSubmit={(event) => { event.preventDefault(); doSetBeaverCount(); }}>
+                    <label className="form-label me-1 mt-1 mb-0" htmlFor="addRandom">Set beavers</label>
+                    <input type="number" id="addRandom" className="form-control form-control-sm" value={targetAmount}
+                      onChange={(event) => { setTargetAmount(parseInt(event.target.value, 10)) }} width={3} style={{width: 60}} />
+                    <button type="submit" className="ms-1 btn btn-primary btn-sm">Set</button>
                   </form>
                   <div className="me-3 d-flex">
                     <label className="form-label me-1 mt-1 mb-0" htmlFor="pageSize">Pagesize</label>
