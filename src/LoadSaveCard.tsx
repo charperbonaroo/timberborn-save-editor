@@ -15,6 +15,7 @@ export function LoadSaveCard({ onSaveLoaded }: { onSaveLoaded: (save: DemoSave) 
       reader.onload = (_event) => {
         try {
           const data = JSON.parse(reader.result as string);
+          data.__originalFilename = file.name;
           onSaveLoaded(data);
         } catch (error) {
           setError(error);

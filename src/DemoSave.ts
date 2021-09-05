@@ -1,4 +1,5 @@
 export interface DemoSave {
+  __originalFilename: string;
   GameVersion: string;
   Timestamp: string;
   Singletons: {

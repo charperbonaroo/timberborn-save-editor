@@ -13,6 +13,7 @@ export const BeaverUtil = {
    * @param beaver
    */
   setDefaultNeeds(beaver: UnknownEntity): void {
+    beaver.Components.MortalNeeder = { DeathDays: [] };
     for (const need of (beaver.Components.NeedManager as any).Needs) {
       if (["Hunger", "Thirst", "Sleep"].includes(need.Name)) {
         need.Points = 1.0;
@@ -38,7 +39,6 @@ export const BeaverUtil = {
         ]
       },
       Dweller: {},
-      MortalNeeder: { DeathDays: [] },
       Worker: {},
     });
   }

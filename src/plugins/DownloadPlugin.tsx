@@ -26,7 +26,7 @@ export const DownloadPlugin: IEditorPlugin<DemoSave, DemoSave> = {
     const url = URL.createObjectURL(blob);
 
     const now = new Date();
-    const filename = `${now.toISOString().substr(0, 10)} ${now.getHours()}h${now.getMinutes()}m, Day ${initialData.Singletons.CycleService.Cycle}-${initialData.Singletons.CycleService.CycleDay} MODDED.json`;
+    const filename = `${initialData.__originalFilename.replace(".json", "")} MODDED ${now.toISOString().substr(0, 10)} ${now.getHours()}h${now.getMinutes()}m.json`;
 
     return <div className="container">
       <div className="card my-4">
