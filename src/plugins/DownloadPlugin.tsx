@@ -6,7 +6,7 @@ export const DownloadPlugin: IEditorPlugin<DemoSave, DemoSave> = {
   id: "DownloadPlugin",
   name: "Download",
   group: "General",
-  position: -1,
+  position: -Infinity,
   enabled: true,
 
   read(saveData) {

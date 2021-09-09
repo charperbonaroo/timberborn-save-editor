@@ -10,7 +10,7 @@ export const MapSizePlugin: IEditorPlugin<MapSizeParams, MapSizeParams> = {
   id: "MapSizePlugin",
   name: "Map size",
   group: "General",
-  position: -1,
+  position: Infinity,
   enabled: true,
 
   read(saveData) {
