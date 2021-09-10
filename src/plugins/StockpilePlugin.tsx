@@ -1,5 +1,5 @@
-import { assign, chunk, fill, groupBy, mapValues, toPairs } from "lodash";
-import { FormEvent, useCallback, useMemo, useState } from "react";
+import { assign, chunk, fill, groupBy, map, mapValues, sum, toPairs, values } from "lodash";
+import { FormEvent, Fragment, useCallback, useMemo, useState } from "react";
 import { DemoSave, UnknownEntity } from "../DemoSave";
 import { IEditorPlugin } from "../IEditorPlugin";
 import { StockpileUtil } from "../StockpileUtil";
@@ -27,8 +27,11 @@ export const StockpilePlugin: IEditorPlugin<DemoSave, DemoSave> = {
     const [ stockpileId, setStockpileId ] = useState<string|null>(null);
     const [ stockpiles, setStockpiles ] = useState(() => StockpileUtil.getStockpiles(initialData));
 
-    const setStockpile = useCallback((stockpile: UnknownEntity) => {
-      setStockpiles(stockpiles.slice().map((_) => _.Id === stockpile.Id ? stockpile : _));
+    const setStockpile = useCallback((type: "self"|"all", stockpile: UnknownEntity) => {
+      setStockpiles(stockpiles.slice().map((_) => (type === "all" ? _.TemplateName === stockpile.TemplateName : _.Id === stockpile.Id) ? {
+        ..._,
+        Components: { ..._.Components, "Inventory:Stockpile": stockpile.Components["Inventory:Stockpile"] }
+      } : _));
       setStockpileId(null);
     }, [setStockpiles, stockpiles, setStockpileId])
 
@@ -56,17 +59,18 @@ export const StockpilePlugin: IEditorPlugin<DemoSave, DemoSave> = {
             : <StockpileButton key={stockpile.Id} setStockpileId={setStockpileId} stockpile={stockpile} />)}
         </div>
       </div>
-    </div>
+    </div>;
   }
 }
 
-function StockpileForm({ stockpile, setStockpile }: { stockpile: UnknownEntity, setStockpile: (stockpile: UnknownEntity) => void }) {
+function StockpileForm({ stockpile, setStockpile }: { stockpile: UnknownEntity, setStockpile: (type: "self"|"all", stockpile: UnknownEntity) => void }) {
   const goods: string[] = useMemo(() => (stockpile.Components.GoodDesirer as any).DesiredGoods.map((_: any) => _.Good.Id), [stockpile]);
   const [ counts, setCounts ] = useState(() => StockpileUtil.countGoods(stockpile));
 
   const onSubmit = useCallback((event: FormEvent) => {
     event.preventDefault();
-    setStockpile({
+    const type = (event.nativeEvent as SubmitEvent).submitter?.getAttribute("value") === "all" ? "all" : "self";
+    setStockpile(type, {
       ...stockpile,
       Components: {
         ...stockpile.Components,
@@ -84,11 +88,14 @@ function StockpileForm({ stockpile, setStockpile }: { stockpile: UnknownEntity, 
     setCounts({ ...counts, [good]: count });
   }, [setCounts, counts]);
 
+  const totalCounts = sum(map(values(counts), _ => _ || 0));
+  const capacity = StockpileUtil.getCapacity(stockpile) ?? 0;
+
   return <div className="list-group-item">
     <div className="d-flex">
       <div>
         <b>{stockpile.TemplateName}</b>
-        <div>
+        <div style={{whiteSpace: "nowrap"}}>
           x: <b>{Math.round((stockpile.Components.BlockObject as any).Coordinates.X)}</b>{" "}
           y: <b>{Math.round((stockpile.Components.BlockObject as any).Coordinates.Y)}</b>{" "}
           z: <b>{Math.round((stockpile.Components.BlockObject as any).Coordinates.Z)}</b>{" "}
@@ -98,12 +105,17 @@ function StockpileForm({ stockpile, setStockpile }: { stockpile: UnknownEntity, 
         {goods.map((good) => <div key={good} className="row mb-3">
           <label className="col-sm-2 col-form-label col-form-label-sm text-end">{good}</label>
           <div className="col-sm-10">
-            <input className="form-control form-control-sm" type="number" onChange={(event) => { setCount(good, event.target.valueAsNumber) }} value={counts[good] || ""} />
+            <input className="form-control form-control-sm" type="number"
+              onChange={(event) => { setCount(good, event.target.valueAsNumber ?? 0) }} value={counts[good] || ""} />
           </div>
         </div>)}
         <div className="row">
-          <div className="col-sm-10 offset-sm-2">
-            <button type="submit" className="btn btn-primary btn-sm">OK</button>
+          <div className="col-sm-10 offset-sm-2 d-flex">
+            <button type="submit" name="submit" value="self" className="btn btn-primary btn-sm">OK</button>
+            {totalCounts > capacity
+              ? <div className="text-danger p-1">Warning: <strong>{totalCounts}</strong> storage exceeds capacity of <strong>{capacity}</strong>!</div>
+              : <div className="p-1"><strong>{totalCounts}</strong> / <strong>{capacity}</strong></div>}
+            <button type="submit" name="submit" value="all" className="ms-auto btn btn-danger btn-sm">OK &amp; update all</button>
           </div>
         </div>
       </form>
@@ -116,7 +128,7 @@ function StockpileButton({ stockpile, setStockpileId }: { stockpile: UnknownEnti
     <div className="d-flex">
       <div>
         <b>{stockpile.TemplateName}</b>
-        <div>
+        <div style={{whiteSpace: "nowrap"}}>
           x: <b>{Math.round((stockpile.Components.BlockObject as any).Coordinates.X)}</b>{" "}
           y: <b>{Math.round((stockpile.Components.BlockObject as any).Coordinates.Y)}</b>{" "}
           z: <b>{Math.round((stockpile.Components.BlockObject as any).Coordinates.Z)}</b>{" "}
@@ -131,10 +143,10 @@ function StockpileInventoryTable({ counts }: { counts: Record<string, number> })
   return <table className="table table-sm table-borderless my-0">
     <tbody>
       {chunk(toPairs(counts), 5).map((chunk, index) => <tr key={index}>
-        {assign(fill(new Array(5), ["", ""]), chunk).map(([label, value], i) => <>
-          <th style={{width: "17%"}} key={"k"+i} className="text-end">{label}</th>
-          <td style={{width: "3%"}} className="text-end" key={"v"+i}>{value}</td>
-        </>)}
+        {assign(fill(new Array(5), ["", ""]), chunk).map(([label, value], i) => <Fragment key={i}>
+          <th style={{width: "17%"}} className="text-end">{label}</th>
+          <td style={{width: "3%"}} className="text-end">{value}</td>
+        </Fragment>)}
       </tr>)}
     </tbody>
   </table>;

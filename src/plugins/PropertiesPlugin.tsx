@@ -48,7 +48,7 @@ export const PropertiesPlugin: IEditorPlugin<Singletons, Singletons> = {
   enabled: true,
   Preview: ({ saveData }) => {
     return <div>
-      {fields.map((_) => <div>{_.label}: <strong>{get(saveData.Singletons, _.path)}</strong></div>)}
+      {fields.map((_) => <div key={_.id}>{_.label}: <strong>{get(saveData.Singletons, _.path)}</strong></div>)}
     </div>;
   },
   Editor: ({ initialData, onClose, onSubmit }) => {
