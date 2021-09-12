@@ -4,6 +4,9 @@
   "private": true,
   "homepage": "https://charperbonaroo.github.io/timberborn-save-editor",
   "dependencies": {
+    "@react-three/drei": "^7.7.0",
+    "@react-three/fiber": "^7.0.6",
+    "@react-three/postprocessing": "^2.0.5",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
@@ -13,9 +16,12 @@
     "@types/react-dom": "^17.0.0",
     "immutable": "^4.0.0-rc.14",
     "lodash": "^4.17.21",
+    "postprocessing": "^6.22.5",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-scripts": "4.0.3",
+    "sass": "^1.39.2",
+    "three": "^0.132.2",
     "typescript": "^4.1.2",
     "web-vitals": "^1.0.1"
   },
@@ -48,6 +54,7 @@
   "devDependencies": {
     "@types/immutable": "^3.8.7",
     "@types/lodash": "^4.14.172",
+    "@types/three": "^0.131.0",
     "gh-pages": "^3.2.3"
   }
 }

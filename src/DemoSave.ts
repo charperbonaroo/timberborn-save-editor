@@ -5,7 +5,7 @@ export interface DemoSave {
   Singletons: {
     MapSize: {Size: {X: number, Y: number}},
     CameraComponent: unknown,
-    TerrainMap: unknown,
+    TerrainMap: {Heights: {Array: string}},
     DayNightCycle: {DayNumber: number, DayProgress: number},
     PlayTimeService: {PlayTime: number},
     DroughtService: {IsDrought: number},
