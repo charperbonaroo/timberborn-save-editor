@@ -56,7 +56,7 @@ export const DownloadPlugin: IEditorPlugin<DemoSave, DemoSave> = {
             <br />
             <br />
             If you encounter issues with the game after loading a savefile created by this tool,
-            please create a bug report <a href="https://github.com/charperbonaroo/timberborn-save-editor/issues" target="_blank" rel="nofollow">here</a> or
+            please create a bug report <a href="https://github.com/charperbonaroo/timberborn-save-editor/issues" target="_blank" rel="noreferrer">here</a> or
             contact <a href="mailto:toby@bonaroo.nl">me</a> directly.
             <br />
             <br />

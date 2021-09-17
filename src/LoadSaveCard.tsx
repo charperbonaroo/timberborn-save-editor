@@ -3,6 +3,7 @@ import { deepCopy } from "./deepCopy";
 import { DemoSave } from "./DemoSave";
 
 const exmapleLetsPlay = require("./examples/lets-play-plains.json");
+const exampleIronTeeth = require("./examples/iron-teeth-plains-1-1.json");
 
 export function LoadSaveCard({ onSaveLoaded }: { onSaveLoaded: (save: DemoSave) => void }) {
   const [ error, setError ] = useState<unknown>();
@@ -55,6 +56,7 @@ export function LoadSaveCard({ onSaveLoaded }: { onSaveLoaded: (save: DemoSave) 
           <div className="card-body">
             <small className="form-text">Or load an example save</small>
             <br />
+            <button className="btn btn-link" onClick={(e) => loadExample("iron-teeth-plains-1-1.json", exampleIronTeeth)}>Iron Teeth 1-1 Plains 256x256</button>
             <button className="btn btn-link" onClick={(e) => loadExample("lets-play-plains.json", exmapleLetsPlay)}>Lets Play Plains 256x256</button>
           </div>
         </div>

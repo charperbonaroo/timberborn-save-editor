@@ -17,6 +17,12 @@ const stockpileTypes = [{
 }, {
   id: "LogPile.Folktails",
   capacity: 180,
+}, {
+  id: "UndergroundWarehouse.Folktails",
+  capacity: 4000,
+}, {
+  id: "LargeWarehouse.Folktails",
+  capacity: 1000,
 }];
 
 const stockpileIds = stockpileTypes.map(_ => _.id)
