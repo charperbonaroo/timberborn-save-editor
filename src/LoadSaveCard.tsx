@@ -63,7 +63,7 @@ export function LoadSaveCard({ onSaveLoaded }: { onSaveLoaded: (save: DemoSave) 
         <div className="p-2 text-center">
           <small className="form-text">
             This editor is made by <a href="https://bonaroo.nl/" rel="noreferrer" target="_blank">Charper Bonaroo BV</a> and is not officially
-            supported by Timberborn. Charper Bonaroo BV is not affiliated with Mechanisty.
+            supported by Timberborn. Charper Bonaroo BV is not affiliated with Mechanistry.
             <br />
             <br />
             <a className="btn btn-sm btn-link" rel="noreferrer" href="https://github.com/charperbonaroo/timberborn-save-editor" target="_blank">Github</a>
