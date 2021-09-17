@@ -1,8 +1,8 @@
 import { BeaverAdultEntity, DemoSave, UnknownEntity } from "../DemoSave";
 import { IEditorPlugin } from "../IEditorPlugin";
 import { Canvas } from '@react-three/fiber'
-import { FormEvent, useMemo, useState } from "react";
-import lodash, { get, set } from "lodash";
+import { FormEvent, useCallback, useMemo, useState } from "react";
+import lodash, { get, set, toPairs } from "lodash";
 import { MapControls } from "@react-three/drei";
 import './MapPlugin.scss';
 import { Navbar } from "../Navbar";
@@ -207,7 +207,7 @@ function Gui(state: GuiProps) {
       <div className="card">
         <div className="card-body">
           <h4 className="card-title">Map Editor</h4>
-          <p>A 3D view of the map. Red bullets are beavers. Click a beaver to edit.</p>
+          <p>A 3D view of the map. Red bars are beavers. Red boxes are warehouses. Click a red thing to edit. Use mouse to navigate camera.</p>
           <button className="btn btn-primary btn-sm" onClick={() => state.onSubmit(state)}>Save</button>
           {" "}
           <button className="btn btn-light btn-sm" onClick={() => state.onClose()}>Discard changes</button>
@@ -330,32 +330,34 @@ function Beaver({ beaver, selectEntityId, selected }: { selected: boolean, beave
 }
 
 function StockpileForm({ selectedEntity, selectEntityId, setEntity }: MutableState) {
-  const [stockpile, setStockpile] = useState<UnknownEntity>(selectedEntity as any);
+  const goodIds = useMemo(() => (selectedEntity as any).Components.GoodDesirer.DesiredGoods.map((_: any) => _.Good.Id), [selectedEntity]) as string[];
+  const [countGoods, setCountGoods] = useState<Record<string, number>>(() => StockpileUtil.countGoods(selectedEntity!, {}));
+  const capacity = StockpileUtil.getCapacity(selectedEntity!)!;
+  const totalCounts = Object.values(countGoods).reduce((a, b) => a + b, 0);
 
-  const getValue = (path: (string|number)[]) => get(stockpile, path);
-  const setValue = (path: (string|number)[], format: (val: string) => any = (x) => x) => (event: FormEvent) => setStockpile(set(deepCopy(stockpile), path, format((event.target as any).value)))
+  const doSubmit = useCallback((event: FormEvent) => {
+    event.preventDefault();
+    const newEntity = deepCopy(selectedEntity) as any;
+    newEntity.Components["Inventory:Stockpile"] = { Storage: { Goods: toPairs(countGoods).map(([Id, Amount]) => ({ Good: {Id}, Amount })) } };
+    setEntity(newEntity);
+    selectEntityId(null);
+  }, [countGoods, selectEntityId, setEntity, selectedEntity]);
 
-  console.log({ stockpile })
-
-  return <form onSubmit={(e) => { e.preventDefault(); setEntity(stockpile); selectEntityId(null); }}>
-    <div className="mb-1 row">
-      <label htmlFor="name" className="col-sm-4 col-form-label col-form-label-sm">Name</label>
+  return <form onSubmit={doSubmit}>
+    {goodIds.map((goodId) => <div className="mb-1 row" key={goodId}>
+      <label htmlFor={"good-" + goodId} className="col-sm-4 col-form-label col-form-label-sm">{goodId}</label>
       <div className="col-sm-8">
-        <input type="text" id="name" className="form-control form-control-sm" value={getValue(["Components", "Beaver", "Name"])} onChange={setValue(["Components", "Beaver", "Name"])} />
+        <input type="number" id={"good-" + goodId} className="form-control form-control-sm" value={countGoods[goodId] || 0}
+          onChange={(event) => setCountGoods({ ...countGoods, [goodId]: event.target.valueAsNumber || 0 })} />
       </div>
-    </div>
-
-    {/* {beaver.Components.NeedManager.Needs.map((need, index) => <div className="mb-1 row" key={index}>
-      <label htmlFor={"need-" + index} className="col-sm-4 col-form-label col-form-label-sm">{need.Name}</label>
-      <div className="col-sm-8">
-        <input type="range" min="0" max="1" step="0.001" id={"need-" + index} className="form-control"
-          value={getValue(["Components", "NeedManager", "Needs", index, "Points"])}
-          onChange={setValue(["Components", "NeedManager", "Needs", index, "Points"], (val) => parseFloat(val))} />
-      </div>
-    </div>)} */}
+    </div>)}
 
     <div className="mt-2 row">
       <div className="col-sm-8 offset-sm-4">
+        {totalCounts > capacity
+          ? <div className="text-danger p-1">Warning: <strong>{totalCounts}</strong> storage exceeds capacity of <strong>{capacity}</strong>!</div>
+          : <div className="p-1"><strong>{totalCounts}</strong> / <strong>{capacity}</strong></div>}
+
         <button type="submit" className="btn btn-secondary btn-sm">OK</button>
         {" "}
         <button type="button" onClick={() => selectEntityId(null)} className="btn btn-light btn-sm">Discard</button>
