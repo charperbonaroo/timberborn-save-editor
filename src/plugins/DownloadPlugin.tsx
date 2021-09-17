@@ -66,6 +66,9 @@ export const DownloadPlugin: IEditorPlugin<DemoSave, DemoSave> = {
             <a href={url} download={filename.endsWith(".json") ? filename : filename + ".json"} className="btn btn-primary" onClick={() => onClose()}>Download</a>
             <button type="button" className="btn btn-light ms-auto" onClick={onClose}>Close</button>
           </div>
+          <small className="form-text">
+            Store your savefile in: <code>%USERPROFILE%\Documents\Timberborn\Saves\</code>
+          </small>
         </div>
       </div>
     </div>;

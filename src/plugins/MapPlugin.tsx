@@ -2,7 +2,7 @@ import { BeaverAdultEntity, DemoSave, UnknownEntity } from "../DemoSave";
 import { IEditorPlugin } from "../IEditorPlugin";
 import { Canvas } from '@react-three/fiber'
 import { FormEvent, useCallback, useMemo, useState } from "react";
-import lodash, { get, set, toPairs } from "lodash";
+import lodash, { compact, get, set, toPairs, uniq } from "lodash";
 import { MapControls } from "@react-three/drei";
 import './MapPlugin.scss';
 import { Navbar } from "../Navbar";
@@ -126,7 +126,20 @@ export const MapPlugin: IEditorPlugin<State, State> = {
     saveData
   }),
 
-  write: (_saveData, { saveData }) => saveData,
+  write: (saveData, state) => {
+    return {
+      ...saveData,
+      Entities: compact(saveData.Entities.map((entity) => {
+        if (state.entityData.deleteIds.includes(entity.Id)) {
+          return null;
+        } else if (state.entityData.updateIds.includes(entity.Id)) {
+          return state.entityData.entitiesByIds[entity.Id];
+        } else {
+          return entity;
+        }
+      }))
+    }
+  },
 
   Preview: ({ saveData }) => <div>
     An interactive 3D Map that will take a while to load.
@@ -144,6 +157,7 @@ export const MapPlugin: IEditorPlugin<State, State> = {
         ...state,
         entityData: {
           ...state.entityData,
+          updateIds: uniq(state.entityData.updateIds.concat([entity.Id])),
           entitiesByIds: {
             ...state.entityData.entitiesByIds,
             [entity.Id]: entity,

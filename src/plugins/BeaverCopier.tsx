@@ -118,7 +118,7 @@ export const BeaverCopier: IEditorPlugin<DemoSave, DemoSave> = {
                   <form className="me-3 d-flex" onSubmit={(event) => { event.preventDefault(); doSetBeaverCount(); }}>
                     <label className="form-label me-1 mt-1 mb-0" htmlFor="addRandom">Set beavers</label>
                     <input type="number" id="addRandom" className="form-control form-control-sm" value={targetAmount}
-                      onChange={(event) => { setTargetAmount(parseInt(event.target.value, 10)) }} width={3} style={{width: 60}} />
+                      onChange={(event) => { setTargetAmount(parseInt(event.target.value, 10)) }} width={3} style={{width: 80}} />
                     <button type="submit" className="ms-1 btn btn-primary btn-sm">Set</button>
                   </form>
                   <div className="me-3 d-flex">
