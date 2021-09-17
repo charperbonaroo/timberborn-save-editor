@@ -179,7 +179,7 @@ export const MapPlugin: IEditorPlugin<State, State> = {
 
     const selectEntityId = useCallback((id: string|null) => {
       if (selectedEntityId && id) {
-        alert("Please OK or discard your current selected entity.");
+        alert("Cannot select new entity when editing another one.");
         return;
       }
       setSelectedEntityId(id);
