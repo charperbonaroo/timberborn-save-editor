@@ -69,6 +69,8 @@ export function LoadSaveCard({ onSaveLoaded }: { onSaveLoaded: (save: DemoSave) 
             <a className="btn btn-sm btn-link" rel="noreferrer" href="https://github.com/charperbonaroo/timberborn-save-editor" target="_blank">Github</a>
             {" "}
             <a className="btn btn-sm btn-link" href="mailto:toby@bonaroo.nl">Contact</a>
+            {" "}
+            <span className="btn-sm" style={{display: "inline-block", lineHeight: "1.5", verticalAlign: "middle"}}>Discord: <b>gamebuster800#2213</b></span>
           </small>
         </div>
       </div>
