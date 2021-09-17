@@ -40,22 +40,35 @@ export function LoadSaveCard({ onSaveLoaded }: { onSaveLoaded: (save: DemoSave) 
   return <div className="container my-4">
     <div className="row">
       <div className="col-md-6 offset-md-3">
-        <label className="card">
-          <div className="card-body">
+        <div className="card">
+          <label className="card-body">
+            <small className="text-danger">A very unofficial &amp; third-party</small>
             <h1 className="card-title">Timberborn Save Editor</h1>
-            <div className="mb-3">
+            <div className="mb-3 mt-4">
               <span className="form-label">Upload your <b>Demo save</b> to start</span>
               <input type="file" name="save" accept=".json" onInput={onInput} className="form-control" />
               {error
                 ? <small className="form-text">{`#{error}`}</small>
                 : <small className="form-text">Default directory: <code>%USERPROFILE%\Documents\Timberborn\Saves\</code></small>}
             </div>
-            <hr />
+          </label>
+          <div className="card-body">
             <small className="form-text">Or load an example save</small>
             <br />
             <button className="btn btn-link" onClick={(e) => loadExample("lets-play-plains.json", exmapleLetsPlay)}>Lets Play Plains 256x256</button>
           </div>
-        </label>
+        </div>
+        <div className="p-2 text-center">
+          <small className="form-text">
+            This editor is made by <a href="https://bonaroo.nl/" rel="noreferrer" target="_blank">Charper Bonaroo BV</a> and is not officially
+            supported by Timberborn. Charper Bonaroo BV is not affiliated with Mechanisty.
+            <br />
+            <br />
+            <a className="btn btn-sm btn-link" rel="noreferrer" href="https://github.com/charperbonaroo/timberborn-save-editor" target="_blank">Github</a>
+            {" "}
+            <a className="btn btn-sm btn-link" href="mailto:toby@bonaroo.nl">Contact</a>
+          </small>
+        </div>
       </div>
     </div>
   </div>

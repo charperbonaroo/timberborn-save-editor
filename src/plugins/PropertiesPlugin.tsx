@@ -6,37 +6,87 @@ import { IEditorPlugin } from "../IEditorPlugin";
 
 type Singletons = DemoSave["Singletons"];
 
-const fields = [{
+interface InputDef {
+  label: string;
+  path: Array<string|number>;
+  type: "number"|"text";
+  parse: (value: string) => any;
+  step?: string;
+}
+
+interface HeaderDef {
+  label: string;
+  type: "header";
+}
+
+type FieldDefinition = InputDef|HeaderDef;
+
+const parseIntValue = (value: string) => parseInt(value, 10);
+
+const fields: FieldDefinition[] = [{
   label: "Science",
   path: ["ScienceService", "SciencePoints"],
   type: "number",
-  parse: (value: string) => parseInt(value, 10),
-  id: "science-points",
+  parse: parseIntValue,
+}, {
+  label: "Cycle & Day",
+  type: "header",
 }, {
   label: "Cycle",
   path: ["WeatherService", "Cycle"],
   type: "number",
-  parse: (value: string) => parseInt(value, 10),
-  id: "cycle",
+  parse: parseIntValue,
 }, {
-  label: "Cycle Day",
+  label: "Cycle day",
   path: ["WeatherService", "CycleDay"],
   type: "number",
-  parse: (value: string) => parseInt(value, 10),
-  id: "cycle-day",
+  parse: parseIntValue,
 }, {
-  label: "Wet season duration",
+  label: "Temperate weather duration",
   path: ["WeatherService", "TemperateWeatherDuration"],
   type: "number",
-  parse: (value: string) => parseInt(value, 10),
-  id: "wet-season-duration",
+  parse: parseIntValue,
 }, {
-  label: "Dry season duration",
+  label: "Drought duration",
   path: ["WeatherService", "DroughtDuration"],
   type: "number",
-  parse: (value: string) => parseInt(value, 10),
-  id: "dry-season-duration",
+  parse: parseIntValue,
+}, {
+  label: "Weather Duration",
+  type: "header",
+}, {
+  label: "Min temperate weather duration",
+  path: ["WeatherDurationService", "MinTemperateWeatherDuration"],
+  type: "number",
+  parse: parseIntValue,
+}, {
+  label: "Max temperate weather duration",
+  path: ["WeatherDurationService", "MaxTemperateWeatherDuration"],
+  type: "number",
+  parse: parseIntValue,
+}, {
+  label: "Min drought duration",
+  path: ["WeatherDurationService", "MinDroughtDuration"],
+  type: "number",
+  parse: parseIntValue,
+}, {
+  label: "Max drought duration",
+  path: ["WeatherDurationService", "MaxDroughtDuration"],
+  type: "number",
+  parse: parseIntValue,
+}, {
+  label: "Handicap multiplier",
+  path: ["WeatherDurationService", "HandicapMultiplier"],
+  type: "number",
+  parse: parseFloat,
+  step: "0.1",
+}, {
+  label: "Handicap cycles",
+  path: ["WeatherDurationService", "HandicapCycles"],
+  type: "number",
+  parse: parseIntValue,
 }];
+
 
 export const PropertiesPlugin: IEditorPlugin<Singletons, Singletons> = {
   read: (saveData) => saveData.Singletons,
@@ -47,9 +97,9 @@ export const PropertiesPlugin: IEditorPlugin<Singletons, Singletons> = {
   group: "General",
   enabled: true,
   Preview: ({ saveData }) => {
-    console.log(saveData);
-    return <div>
-      {fields.map((_) => <div key={_.id}>{_.label}: <strong>{get(saveData.Singletons, _.path)}</strong></div>)}
+    return <div className="row">
+      {(fields.filter((_) => _.type !== "header") as InputDef[])
+        .map((_) => <div className="col-4" key={(_.path.join("."))}>{_.label}: <strong>{get(saveData.Singletons, _.path)}</strong></div>)}
     </div>;
   },
   Editor: ({ initialData, onClose, onSubmit }) => {
@@ -60,12 +110,22 @@ export const PropertiesPlugin: IEditorPlugin<Singletons, Singletons> = {
         <div className="card my-4">
           <div className="card-body">
             <h1 className="card-title">Properties</h1>
-            {fields.map(({ path, type, parse, id, label }) => <div key={id} className="mb-3">
-              <label htmlFor={id} className="form-label">{label}</label>
-              <input id={id} type={type} className="form-control"
-                value={data.getIn(path) as string}
-                onInput={(e) => setData(data.setIn(path, parse((e.target as HTMLInputElement).value)))} />
-            </div>)}
+            <div className="row">
+              {fields.map((field) => {
+                if (field.type === "header") {
+                  return <h5 key={field.label} className="mb-1 col-12">{field.label}</h5>
+                } else {
+                  const { path, type, parse, label } = field;
+                  const id = path.join(".")
+                  return <div key={id} className="mb-3 col-4">
+                    <label htmlFor={id} className="form-label form-label-sm">{label}</label>
+                    <input id={id} type={type} className="form-control form-control-sm"
+                      value={data.getIn(path) as string} step={field.step}
+                      onInput={(e) => setData(data.setIn(path, parse((e.target as HTMLInputElement).value)))} />
+                  </div>;
+                }
+              })}
+            </div>
             <div className="d-flex">
               <button type="submit" className="btn btn-primary">Submit</button>
               <button type="button" className="btn btn-light ms-auto" onClick={onClose}>Discard changes</button>

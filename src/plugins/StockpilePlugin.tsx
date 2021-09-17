@@ -1,4 +1,4 @@
-import { assign, chunk, fill, groupBy, map, mapValues, sum, toPairs, values } from "lodash";
+import { assign, chunk, fill, groupBy, map, mapValues, sum, toPairs, uniq, values } from "lodash";
 import { FormEvent, Fragment, useCallback, useMemo, useState } from "react";
 import { DemoSave, UnknownEntity } from "../DemoSave";
 import { IEditorPlugin } from "../IEditorPlugin";
@@ -15,6 +15,7 @@ export const StockpilePlugin: IEditorPlugin<DemoSave, DemoSave> = {
   write: (_, data) => data,
 
   Preview: ({ saveData }) => {
+    console.log(uniq(saveData.Entities.filter((_) => _.Components["Inventory:Stockpile"]).map(_ => _.Template)))
     const stockpiles = useMemo(() => StockpileUtil.getStockpiles(saveData), [saveData]);
     const allGoods = useMemo(() => stockpiles.reduce((acc, stockpile) => StockpileUtil.countGoods(stockpile, acc), {} as Record<string, number>), [stockpiles]);
 

@@ -9,6 +9,7 @@ import { Navbar } from "../Navbar";
 import { BoxBufferGeometry, BufferGeometry, ConeBufferGeometry, Mesh, MeshStandardMaterial, PlaneBufferGeometry } from "three";
 import { EffectComposer, SSAO as _SSAO } from "@react-three/postprocessing";
 import { deepCopy } from "../deepCopy";
+import { StockpileUtil } from "../StockpileUtil";
 
 const SSAO = _SSAO as any;
 const { BlendFunction } = require("postprocessing") as any;
@@ -45,7 +46,25 @@ interface EntityData {
   entitiesIdsByTemplate: Record<string, string[]>;
 }
 
-const EDITABLE_ENTITIES = ["BeaverAdult", "BeaverChild", "Maple", "Pine", "Birch", "Path.Folktails"];
+const STOCKPILE_ENTITIES = StockpileUtil.stockpileTypes.map(_ => _.id);
+const TREE_ENTITIES = [
+  "Maple",
+  "Pine",
+  "Birch",
+]
+
+const BEAVER_ENTITIES = [
+  "BeaverAdult",
+  "BeaverChild",
+]
+
+const PATH_ENTITIES = [
+  "Path.Folktails"
+]
+
+const EDITABLE_ENTITIES = [
+  ...STOCKPILE_ENTITIES, ...TREE_ENTITIES, ...BEAVER_ENTITIES, ...PATH_ENTITIES
+];
 
 const useEntitiesOfTypes = (entityData: EntityData, templateIds: string[]) => {
   const {entitiesIdsByTemplate, entitiesByIds} = entityData;
@@ -110,7 +129,7 @@ export const MapPlugin: IEditorPlugin<State, State> = {
   write: (_saveData, { saveData }) => saveData,
 
   Preview: ({ saveData }) => <div>
-    A 3D Map
+    An interactive 3D Map that will take a while to load.
   </div>,
 
   Editor: ({ initialData, onSubmit, onClose }) => {
@@ -146,7 +165,7 @@ export const MapPlugin: IEditorPlugin<State, State> = {
 
     return <div className="Map__Editor">
       <Navbar onHome={onClose} />
-      <Gui {...state} selectEntityId={selectEntityId} selectedEntity={selectedEntity} setEntity={setEntity} />
+      <Gui {...state} onSubmit={onSubmit} onClose={onClose} selectEntityId={selectEntityId} selectedEntity={selectedEntity} setEntity={setEntity} />
 
       <Canvas className="Map__Canvas" camera={{position: [32, 64, -64]}}>
         <EffectComposer>
@@ -166,6 +185,7 @@ export const MapPlugin: IEditorPlugin<State, State> = {
             <SlowBoxesWaterMap {...state} />
             <TreesMap {...state} />
             <PathsMap {...state} />
+            <StockpilesMap {...state} selectEntityId={selectEntityId} selectedEntity={selectedEntity} setEntity={setEntity} />
             <BeaversMap {...state} selectEntityId={selectEntityId} selectedEntity={selectedEntity} setEntity={setEntity} />
           </group>
         </group>
@@ -175,9 +195,26 @@ export const MapPlugin: IEditorPlugin<State, State> = {
   }
 }
 
-function Gui(state: MutableState) {
+interface GuiProps extends MutableState {
+  onSubmit: (state: State) => void;
+  onClose: () => void;
+}
+
+function Gui(state: GuiProps) {
   if (!state.selectedEntity) {
-    return null;
+    return <div className="Map__Gui">
+    <div className="Map__Gui__Right p-4">
+      <div className="card">
+        <div className="card-body">
+          <h4 className="card-title">Map Editor</h4>
+          <p>A 3D view of the map. Red bullets are beavers. Click a beaver to edit.</p>
+          <button className="btn btn-primary btn-sm" onClick={() => state.onSubmit(state)}>Save</button>
+          {" "}
+          <button className="btn btn-light btn-sm" onClick={() => state.onClose()}>Discard changes</button>
+        </div>
+      </div>
+    </div>
+  </div>;
   }
 
   return <div className="Map__Gui">
@@ -185,7 +222,8 @@ function Gui(state: MutableState) {
       <div className="card">
         <div className="card-body">
           <h4 className="card-title">{state.selectedEntity.Template}</h4>
-          <BeaverForm {...state} />
+          {STOCKPILE_ENTITIES.includes(state.selectedEntity.Template) ? <StockpileForm {...state} /> : null}
+          {BEAVER_ENTITIES.includes(state.selectedEntity.Template) ? <BeaverForm {...state} /> : null}
         </div>
       </div>
     </div>
@@ -217,7 +255,7 @@ function BeaverForm({ selectedEntity, selectEntityId, setEntity }: MutableState)
 
     <div className="mt-2 row">
       <div className="col-sm-8 offset-sm-4">
-        <button type="submit" className="btn btn-primary btn-sm">Save</button>
+        <button type="submit" className="btn btn-secondary btn-sm">OK</button>
         {" "}
         <button type="button" onClick={() => selectEntityId(null)} className="btn btn-light btn-sm">Discard</button>
       </div>
@@ -225,11 +263,45 @@ function BeaverForm({ selectedEntity, selectEntityId, setEntity }: MutableState)
   </form>
 }
 
-function BeaversMap({ entityData, selectEntityId, selectedEntity }: MutableState) {
-  const beavers = useEntitiesOfTypes(entityData, ["BeaverAdult", "BeaverChild"])
+function StockpilesMap({ entityData, selectEntityId, selectedEntity }: MutableState) {
+  const stockpiles = useEntitiesOfTypes(entityData, STOCKPILE_ENTITIES)
 
   return <group>
-    {beavers.map((beaver) => <Beaver selected={selectedEntity === beaver} key={beaver.Id} beaver={beaver} selectEntityId={selectEntityId} />)}
+    {stockpiles.map((stockpile) => <Stockpile selected={selectedEntity === stockpile}
+      key={stockpile.Id} stockpile={stockpile} selectEntityId={selectEntityId} />)}
+  </group>
+}
+
+function Stockpile({ stockpile, selectEntityId, selected }: { selected: boolean, stockpile: UnknownEntity, selectEntityId: (id: string) => void }) {
+  const [isHover, setIsHover] = useState(false);
+
+  const onClick = () => { selectEntityId(stockpile.Id); }
+  const onPointerEnter = () => { setIsHover(true); }
+  const onPointerLeave = () => { setIsHover(false); }
+
+  const pos = (stockpile.Components as any).BlockObject.Coordinates;
+  const x: number = pos.X;
+  const y: number = pos.Z + 0.5;
+  const z: number = pos.Y;
+
+  return <mesh onPointerEnter={onPointerEnter} onPointerLeave={onPointerLeave} onClick={onClick} key={stockpile.Id} position={[x, y, z]}>
+    <meshStandardMaterial color={selected ? "#651FFF" : (isHover ? "#FF8A65" : "#E64A19")} />
+    <boxBufferGeometry args={[
+      (isHover || selected) ? 1.4 : 1.0,
+      (isHover || selected) ? 1.2 : 1.0,
+      (isHover || selected) ? 1.4 : 1.0,
+      8.0,
+      8.0,
+    ]} />
+  </mesh>;
+}
+
+function BeaversMap({ entityData, selectEntityId, selectedEntity }: MutableState) {
+  const beavers = useEntitiesOfTypes(entityData, BEAVER_ENTITIES)
+
+  return <group>
+    {beavers.map((beaver) => <Beaver selected={selectedEntity === beaver} key={beaver.Id}
+      beaver={beaver} selectEntityId={selectEntityId} />)}
   </group>;
 }
 
@@ -242,19 +314,54 @@ function Beaver({ beaver, selectEntityId, selected }: { selected: boolean, beave
 
   const pos = (beaver.Components as any).Beaver.Position;
   const isAdult = beaver.Template === "BeaverAdult";
-  const x: number = pos.X;
+  const x: number = pos.X - 0.5;
   const y: number = pos.Y + 0.1 + (isAdult ? 0.5 : 0.3);
-  const z: number = pos.Z;
+  const z: number = pos.Z - 0.5;
   return <mesh onPointerEnter={onPointerEnter} onPointerLeave={onPointerLeave} onClick={onClick} key={beaver.Id} position={[x, y, z]}>
     <meshStandardMaterial color={selected ? "#651FFF" : (isHover ? "#FF8A65" : "#E64A19")} />
     <cylinderBufferGeometry args={[
-      (isHover || selected) ? 0.6 : 0.4,
-      (isHover || selected) ? 0.6 : 0.4,
+      (isHover || selected) ? 0.4 : 0.2,
+      (isHover || selected) ? 0.4 : 0.2,
       (beaver.Template === "BeaverAdult" ? 1.0 : 0.6) * (isHover || selected ? 1.2 : 1.0),
       8.0,
       1.0,
     ]} />
   </mesh>;
+}
+
+function StockpileForm({ selectedEntity, selectEntityId, setEntity }: MutableState) {
+  const [stockpile, setStockpile] = useState<UnknownEntity>(selectedEntity as any);
+
+  const getValue = (path: (string|number)[]) => get(stockpile, path);
+  const setValue = (path: (string|number)[], format: (val: string) => any = (x) => x) => (event: FormEvent) => setStockpile(set(deepCopy(stockpile), path, format((event.target as any).value)))
+
+  console.log({ stockpile })
+
+  return <form onSubmit={(e) => { e.preventDefault(); setEntity(stockpile); selectEntityId(null); }}>
+    <div className="mb-1 row">
+      <label htmlFor="name" className="col-sm-4 col-form-label col-form-label-sm">Name</label>
+      <div className="col-sm-8">
+        <input type="text" id="name" className="form-control form-control-sm" value={getValue(["Components", "Beaver", "Name"])} onChange={setValue(["Components", "Beaver", "Name"])} />
+      </div>
+    </div>
+
+    {/* {beaver.Components.NeedManager.Needs.map((need, index) => <div className="mb-1 row" key={index}>
+      <label htmlFor={"need-" + index} className="col-sm-4 col-form-label col-form-label-sm">{need.Name}</label>
+      <div className="col-sm-8">
+        <input type="range" min="0" max="1" step="0.001" id={"need-" + index} className="form-control"
+          value={getValue(["Components", "NeedManager", "Needs", index, "Points"])}
+          onChange={setValue(["Components", "NeedManager", "Needs", index, "Points"], (val) => parseFloat(val))} />
+      </div>
+    </div>)} */}
+
+    <div className="mt-2 row">
+      <div className="col-sm-8 offset-sm-4">
+        <button type="submit" className="btn btn-secondary btn-sm">OK</button>
+        {" "}
+        <button type="button" onClick={() => selectEntityId(null)} className="btn btn-light btn-sm">Discard</button>
+      </div>
+    </div>
+  </form>
 }
 
 function createTreeGeom({ dry, dead, adult, x, y, z }: {
@@ -280,7 +387,7 @@ function meshWithColorFromGeoms(geometries: any[], color: string) {
 }
 
 function PathsMap({ entityData }: State) {
-  const paths = useEntitiesOfTypes(entityData, ["Path.Folktails"]);
+  const paths = useEntitiesOfTypes(entityData, PATH_ENTITIES);
   const geom = useMemo(() => meshWithColorFromGeoms(paths
     .map((_: any) => new PlaneBufferGeometry(1, 1, 1, 1)
       .rotateX(-Math.PI/2)
@@ -295,7 +402,7 @@ function PathsMap({ entityData }: State) {
 }
 
 function TreesMap({ entityData }: State) {
-  const treeEntities = useEntitiesOfTypes(entityData, ["Pine", "Maple", "Birch"]);
+  const treeEntities = useEntitiesOfTypes(entityData, TREE_ENTITIES);
 
   const {greenTrees, brownTrees} = useMemo(() => {
     const trees = treeEntities.map((_: any) => ({

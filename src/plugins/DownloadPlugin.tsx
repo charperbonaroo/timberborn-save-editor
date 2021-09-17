@@ -18,17 +18,24 @@ export const DownloadPlugin: IEditorPlugin<DemoSave, DemoSave> = {
   },
 
   Preview({ saveData }) {
-    return null;
+    return <strong>Click here to download your modified save!</strong>;
   },
 
-  Editor({ initialData, onClose }) {
-    const blob = useMemo(() => new Blob([JSON.stringify(initialData, null, 2)], {type: 'application/json'}), [initialData]);
+  Editor({ initialData: saveData, onClose }) {
+
+    saveData = {
+      ...saveData,
+      GameVersion: saveData.GameVersion.replace(/-TSE$/, "") + "-TSE",
+      Editor: "https://charperbonaroo.github.io/timberborn-save-editor/",
+    }
+
+    const blob = useMemo(() => new Blob([JSON.stringify(saveData)], {type: 'application/json'}), [saveData]);
     const url = URL.createObjectURL(blob);
 
 
     const [filename, setFilename] = useState<string>(() => {
       const now = new Date();
-      return `${initialData.__originalFilename.replace(".json", "")} MODDED ${now.toISOString().substr(0, 10)} ${now.getHours()}h${now.getMinutes()}m.json`;
+      return `${saveData.__originalFilename.replace(".json", "")} MODDED ${now.toISOString().substr(0, 10)} ${now.getHours()}h${now.getMinutes()}m.json`;
     });
 
     return <div className="container">
