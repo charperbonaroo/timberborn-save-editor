@@ -28,7 +28,7 @@ export const StockpilePlugin: IEditorPlugin<DemoSave, DemoSave> = {
     const [ stockpiles, setStockpiles ] = useState(() => StockpileUtil.getStockpiles(initialData));
 
     const setStockpile = useCallback((type: "self"|"all", stockpile: UnknownEntity) => {
-      setStockpiles(stockpiles.slice().map((_) => (type === "all" ? _.TemplateName === stockpile.TemplateName : _.Id === stockpile.Id) ? {
+      setStockpiles(stockpiles.slice().map((_) => (type === "all" ? _.Template === stockpile.Template : _.Id === stockpile.Id) ? {
         ..._,
         Components: { ..._.Components, "Inventory:Stockpile": stockpile.Components["Inventory:Stockpile"] }
       } : _));
@@ -94,7 +94,7 @@ function StockpileForm({ stockpile, setStockpile }: { stockpile: UnknownEntity, 
   return <div className="list-group-item">
     <div className="d-flex">
       <div>
-        <b>{stockpile.TemplateName}</b>
+        <b>{stockpile.Template}</b>
         <div style={{whiteSpace: "nowrap"}}>
           x: <b>{Math.round((stockpile.Components.BlockObject as any).Coordinates.X)}</b>{" "}
           y: <b>{Math.round((stockpile.Components.BlockObject as any).Coordinates.Y)}</b>{" "}
@@ -127,7 +127,7 @@ function StockpileButton({ stockpile, setStockpileId }: { stockpile: UnknownEnti
   return <button onClick={() => setStockpileId(stockpile.Id)} className="list-group-item list-group-item-action">
     <div className="d-flex">
       <div>
-        <b>{stockpile.TemplateName}</b>
+        <b>{stockpile.Template}</b>
         <div style={{whiteSpace: "nowrap"}}>
           x: <b>{Math.round((stockpile.Components.BlockObject as any).Coordinates.X)}</b>{" "}
           y: <b>{Math.round((stockpile.Components.BlockObject as any).Coordinates.Y)}</b>{" "}

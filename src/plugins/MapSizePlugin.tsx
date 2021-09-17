@@ -26,6 +26,8 @@ export const MapSizePlugin: IEditorPlugin<MapSizeParams, MapSizeParams> = {
   },
 
   Preview({ saveData }) {
+    console.log(saveData.Entities.map(_ => _.Template).filter((_, i, arr) => arr.indexOf(_) === i))
+
     const x = saveData.Singletons.MapSize.Size.X;
     const y = saveData.Singletons.MapSize.Size.Y;
     return <span>

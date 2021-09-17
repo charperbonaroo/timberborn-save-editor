@@ -2,9 +2,7 @@ import { FormEvent, useCallback, useState } from "react";
 import { deepCopy } from "./deepCopy";
 import { DemoSave } from "./DemoSave";
 
-const exampleDemoPlains256x256 = require("./examples/demo-plains-256x256.json");
-const exampleDemoCanyon128x128 = require("./examples/demo-canyon-128x128.json");
-const exmapleDemoLetsPlay = require("./examples/demo-lets-play.json");
+const exmapleLetsPlay = require("./examples/lets-play-plains.json");
 
 export function LoadSaveCard({ onSaveLoaded }: { onSaveLoaded: (save: DemoSave) => void }) {
   const [ error, setError ] = useState<unknown>();
@@ -50,14 +48,12 @@ export function LoadSaveCard({ onSaveLoaded }: { onSaveLoaded: (save: DemoSave) 
               <input type="file" name="save" accept=".json" onInput={onInput} className="form-control" />
               {error
                 ? <small className="form-text">{`#{error}`}</small>
-                : <small className="form-text">Default directory: <code>%USERPROFILE%\Documents\Timberborn\DemoSaves\</code></small>}
+                : <small className="form-text">Default directory: <code>%USERPROFILE%\Documents\Timberborn\Saves\</code></small>}
             </div>
             <hr />
             <small className="form-text">Or load an example save</small>
             <br />
-            <button className="btn btn-link" onClick={(e) => loadExample("demo-plains-256x256.json", exampleDemoPlains256x256)}>Demo Plains 256x256</button>
-            <button className="btn btn-link" onClick={(e) => loadExample("demo-canyon-128x128.json", exampleDemoCanyon128x128)}>Demo Canyon 128x128</button>
-            <button className="btn btn-link" onClick={(e) => loadExample("demo-lets-play-256x256.json", exmapleDemoLetsPlay)}>Lets Play 256x256</button>
+            <button className="btn btn-link" onClick={(e) => loadExample("lets-play-plains.json", exmapleLetsPlay)}>Lets Play Plains 256x256</button>
           </div>
         </label>
       </div>

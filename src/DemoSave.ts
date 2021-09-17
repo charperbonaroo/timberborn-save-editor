@@ -35,7 +35,7 @@ export type DemoSaveEntity = UnknownEntity;
 
 export interface BeaverAdultEntity {
   Id: string;
-  TemplateName: "BeaverAdult",
+  Template: "BeaverAdult",
   Components: {
     Beaver: {
       Name: string;
@@ -84,6 +84,6 @@ export interface BeaverAdultEntity {
 
 export interface UnknownEntity {
   Id: string;
-  TemplateName: string;
+  Template: string;
   Components: Record<string, unknown>;
 }

@@ -25,9 +25,9 @@ export const BeaverCopier: IEditorPlugin<DemoSave, DemoSave> = {
   },
 
   Editor({ initialData, onClose, onSubmit }) {
-    const [ beavers, setBeavers ] = useState(() => initialData.Entities.filter(_ => _.TemplateName === "BeaverChild" || _.TemplateName === "BeaverAdult"))
+    const [ beavers, setBeavers ] = useState(() => initialData.Entities.filter(_ => _.Template === "BeaverChild" || _.Template === "BeaverAdult"))
     const [ page, setPage ] = useState(0);
-    const [ pageSize, setPageSize ] = useState(10);
+    const [ pageSize, setPageSize ] = useState(25);
     const [ targetAmount, setTargetAmount ] = useState(70);
 
     const sortedBeavers = sortBy(beavers.slice(), _ => -(_ as any).Components.Beaver.DayOfBirth);
@@ -38,7 +38,7 @@ export const BeaverCopier: IEditorPlugin<DemoSave, DemoSave> = {
       const newBeaver = deepCopy(beaver);
       BeaverUtil.reset(newBeaver);
       BeaverUtil.setDefaultName(initialData, newBeaver);
-      if (newBeaver.TemplateName === "BeaverAdult") {
+      if (newBeaver.Template === "BeaverAdult") {
         BeaverUtil.setAge(initialData, beaver, 5)
       }
       return newBeaver;
@@ -50,7 +50,7 @@ export const BeaverCopier: IEditorPlugin<DemoSave, DemoSave> = {
 
     const doSubmit = useCallback(() => {
       const Entities = initialData.Entities
-        .filter(_ => _.TemplateName !== "BeaverChild" && _.TemplateName !== "BeaverAdult")
+        .filter(_ => _.Template !== "BeaverChild" && _.Template !== "BeaverAdult")
         .concat(beavers);
 
       onSubmit({ ...initialData, Entities });
@@ -59,7 +59,7 @@ export const BeaverCopier: IEditorPlugin<DemoSave, DemoSave> = {
     const hasNextPage = pageSize + offset < beavers.length;
 
     const doSetBeaverCount = useCallback(() => {
-      const adults = beavers.filter(_ => _.TemplateName === "BeaverAdult");
+      const adults = beavers.filter(_ => _.Template === "BeaverAdult");
       const newBeavers = beavers.slice();
       for (const beaver of newBeavers) {
         BeaverUtil.setDefaultNeeds(beaver);
@@ -84,10 +84,6 @@ export const BeaverCopier: IEditorPlugin<DemoSave, DemoSave> = {
               <button type="button" onClick={doSubmit} className="btn btn-primary">Submit</button>
             </div>
           </div>
-          {beavers.length > 80 ? <div className="alert alert-danger mt-1">
-            <b>WARNING:</b> You have {beavers.length} beavers. Newer versions of
-            the Timberborn Demo will randomly crash with over 80 beavers.
-          </div> : null}
         </div>
         <table className="table my-0">
           <thead>
@@ -101,7 +97,7 @@ export const BeaverCopier: IEditorPlugin<DemoSave, DemoSave> = {
           <tbody>
             {sortedBeavers.slice(offset, offset + pageSize).map((beaver: any) => <tr key={beaver.Id}>
               <td>{beaver.Components.Beaver.Name}</td>
-              <td>{initialData.Singletons.DayNightCycle.DayNumber - beaver.Components.Beaver.DayOfBirth} {beaver.TemplateName === "BeaverChild" ? <small>(child)</small> : null}</td>
+              <td>{initialData.Singletons.DayNightCycle.DayNumber - beaver.Components.Beaver.DayOfBirth} {beaver.Template === "BeaverChild" ? <small>(child)</small> : null}</td>
               <td>
                 x: <b>{Math.round(beaver.Components.Beaver.Position.X)}</b>{" "}
                 y: <b>{Math.round(beaver.Components.Beaver.Position.Y)}</b>{" "}
@@ -153,10 +149,10 @@ export const BeaverCopier: IEditorPlugin<DemoSave, DemoSave> = {
 
 function BeaverStatus({entities}: {entities: DemoSaveEntity[]}) {
   const {adultCount, childCount} = entities.reduce((acc, entity) => {
-    if (entity.TemplateName === "BeaverAdult") {
+    if (entity.Template === "BeaverAdult") {
       acc.adultCount++;
     }
-    if (entity.TemplateName === "BeaverChild") {
+    if (entity.Template === "BeaverChild") {
       acc.childCount++;
     }
     return acc;

@@ -45,7 +45,7 @@ interface EntityData {
   entitiesIdsByTemplate: Record<string, string[]>;
 }
 
-const EDITABLE_ENTITIES = ["BeaverAdult", "BeaverChild", "Maple", "Pine", "Birch", "DirtPath"];
+const EDITABLE_ENTITIES = ["BeaverAdult", "BeaverChild", "Maple", "Pine", "Birch", "Path.Folktails"];
 
 const useEntitiesOfTypes = (entityData: EntityData, templateIds: string[]) => {
   const {entitiesIdsByTemplate, entitiesByIds} = entityData;
@@ -59,13 +59,13 @@ const useEntitiesOfTypes = (entityData: EntityData, templateIds: string[]) => {
 
 function readEntityData(saveData: DemoSave) {
   return lodash(saveData.Entities)
-    .filter(_ => EDITABLE_ENTITIES.includes(_.TemplateName))
+    .filter(_ => EDITABLE_ENTITIES.includes(_.Template))
     .reduce((acc, entity) => {
       acc.entitiesByIds[entity.Id] = entity;
-      if (!acc.entitiesIdsByTemplate[entity.TemplateName]) {
-        acc.entitiesIdsByTemplate[entity.TemplateName] = [];
+      if (!acc.entitiesIdsByTemplate[entity.Template]) {
+        acc.entitiesIdsByTemplate[entity.Template] = [];
       }
-      acc.entitiesIdsByTemplate[entity.TemplateName].push(entity.Id);
+      acc.entitiesIdsByTemplate[entity.Template].push(entity.Id);
       return acc;
     }, {
       deleteIds: [],
@@ -132,12 +132,12 @@ export const MapPlugin: IEditorPlugin<State, State> = {
         }
       }
 
-      if (!oldEntity || oldEntity.TemplateName !== entity.TemplateName) {
+      if (!oldEntity || oldEntity.Template !== entity.Template) {
         newState.entityData.entitiesIdsByTemplate = {
           ...newState.entityData.entitiesIdsByTemplate,
-          [oldEntity.TemplateName]: (newState.entityData.entitiesIdsByTemplate[oldEntity.TemplateName] || [])
+          [oldEntity.Template]: (newState.entityData.entitiesIdsByTemplate[oldEntity.Template] || [])
             .filter(_ => !oldEntity || (oldEntity && _ !== oldEntity.Id)),
-          [entity.TemplateName]: [...newState.entityData.entitiesIdsByTemplate[entity.TemplateName], entity.Id]
+          [entity.Template]: [...newState.entityData.entitiesIdsByTemplate[entity.Template], entity.Id]
         };
       }
 
@@ -184,7 +184,7 @@ function Gui(state: MutableState) {
     <div className="Map__Gui__Right p-4">
       <div className="card">
         <div className="card-body">
-          <h4 className="card-title">{state.selectedEntity.TemplateName}</h4>
+          <h4 className="card-title">{state.selectedEntity.Template}</h4>
           <BeaverForm {...state} />
         </div>
       </div>
@@ -199,22 +199,28 @@ function BeaverForm({ selectedEntity, selectEntityId, setEntity }: MutableState)
   const setValue = (path: (string|number)[], format: (val: string) => any = (x) => x) => (event: FormEvent) => setBeaver(set(deepCopy(beaver), path, format((event.target as any).value)))
 
   return <form onSubmit={(e) => { e.preventDefault(); setEntity(beaver); selectEntityId(null); }}>
-    <div className="mb-3">
-      <label htmlFor="name" className="form-label">Name</label>
-      <input type="text" id="name" className="form-control" value={getValue(["Components", "Beaver", "Name"])} onChange={setValue(["Components", "Beaver", "Name"])} />
+    <div className="mb-1 row">
+      <label htmlFor="name" className="col-sm-4 col-form-label col-form-label-sm">Name</label>
+      <div className="col-sm-8">
+        <input type="text" id="name" className="form-control form-control-sm" value={getValue(["Components", "Beaver", "Name"])} onChange={setValue(["Components", "Beaver", "Name"])} />
+      </div>
     </div>
 
-    {beaver.Components.NeedManager.Needs.map((need, index) => <div className="mb-3" key={index}>
-      <label htmlFor={"need-" + index} className="form-label">{need.Name}</label>
-      <input type="range" min="0" max="1" step="0.001" id={"need-" + index} className="form-control"
-        value={getValue(["Components", "NeedManager", "Needs", index, "Points"])}
-        onChange={setValue(["Components", "NeedManager", "Needs", index, "Points"], (val) => parseFloat(val))} />
+    {beaver.Components.NeedManager.Needs.map((need, index) => <div className="mb-1 row" key={index}>
+      <label htmlFor={"need-" + index} className="col-sm-4 col-form-label col-form-label-sm">{need.Name}</label>
+      <div className="col-sm-8">
+        <input type="range" min="0" max="1" step="0.001" id={"need-" + index} className="form-control"
+          value={getValue(["Components", "NeedManager", "Needs", index, "Points"])}
+          onChange={setValue(["Components", "NeedManager", "Needs", index, "Points"], (val) => parseFloat(val))} />
+      </div>
     </div>)}
 
-    <div className="mb-3">
-      <button type="submit" className="btn btn-primary">Save</button>
-      {" "}
-      <button type="button" onClick={() => selectEntityId(null)} className="btn btn-light">Discard</button>
+    <div className="mt-2 row">
+      <div className="col-sm-8 offset-sm-4">
+        <button type="submit" className="btn btn-primary btn-sm">Save</button>
+        {" "}
+        <button type="button" onClick={() => selectEntityId(null)} className="btn btn-light btn-sm">Discard</button>
+      </div>
     </div>
   </form>
 }
@@ -235,7 +241,7 @@ function Beaver({ beaver, selectEntityId, selected }: { selected: boolean, beave
   const onPointerLeave = () => { setIsHover(false); }
 
   const pos = (beaver.Components as any).Beaver.Position;
-  const isAdult = beaver.TemplateName === "BeaverAdult";
+  const isAdult = beaver.Template === "BeaverAdult";
   const x: number = pos.X;
   const y: number = pos.Y + 0.1 + (isAdult ? 0.5 : 0.3);
   const z: number = pos.Z;
@@ -244,7 +250,7 @@ function Beaver({ beaver, selectEntityId, selected }: { selected: boolean, beave
     <cylinderBufferGeometry args={[
       (isHover || selected) ? 0.6 : 0.4,
       (isHover || selected) ? 0.6 : 0.4,
-      (beaver.TemplateName === "BeaverAdult" ? 1.0 : 0.6) * (isHover || selected ? 1.2 : 1.0),
+      (beaver.Template === "BeaverAdult" ? 1.0 : 0.6) * (isHover || selected ? 1.2 : 1.0),
       8.0,
       1.0,
     ]} />
@@ -274,7 +280,7 @@ function meshWithColorFromGeoms(geometries: any[], color: string) {
 }
 
 function PathsMap({ entityData }: State) {
-  const paths = useEntitiesOfTypes(entityData, ["DirtPath"]);
+  const paths = useEntitiesOfTypes(entityData, ["Path.Folktails"]);
   const geom = useMemo(() => meshWithColorFromGeoms(paths
     .map((_: any) => new PlaneBufferGeometry(1, 1, 1, 1)
       .rotateX(-Math.PI/2)
@@ -294,8 +300,8 @@ function TreesMap({ entityData }: State) {
   const {greenTrees, brownTrees} = useMemo(() => {
     const trees = treeEntities.map((_: any) => ({
         entity: _,
-        dry: _.Components.WateredObject.IsDry as boolean,
-        dead: _.Components.LivingNaturalResource.IsDead as boolean,
+        dry: _.Components.WateredNaturalResource.DryingProgress > 0.9999,
+        dead: false, // _.Components.LivingNaturalResource.IsDead as boolean,
         adult: _.Components.Growable.GrowthProgress > 0.9999,
         x: _.Components.BlockObject.Coordinates.X as number,
         z: _.Components.BlockObject.Coordinates.Y as number,

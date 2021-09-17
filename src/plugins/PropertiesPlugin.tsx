@@ -14,25 +14,25 @@ const fields = [{
   id: "science-points",
 }, {
   label: "Cycle",
-  path: ["CycleService", "Cycle"],
+  path: ["WeatherService", "Cycle"],
   type: "number",
   parse: (value: string) => parseInt(value, 10),
   id: "cycle",
 }, {
   label: "Cycle Day",
-  path: ["CycleService", "CycleDay"],
+  path: ["WeatherService", "CycleDay"],
   type: "number",
   parse: (value: string) => parseInt(value, 10),
   id: "cycle-day",
 }, {
   label: "Wet season duration",
-  path: ["CycleService", "WetSeasonDuration"],
+  path: ["WeatherService", "TemperateWeatherDuration"],
   type: "number",
   parse: (value: string) => parseInt(value, 10),
   id: "wet-season-duration",
 }, {
   label: "Dry season duration",
-  path: ["CycleService", "DrySeasonDuration"],
+  path: ["WeatherService", "DroughtDuration"],
   type: "number",
   parse: (value: string) => parseInt(value, 10),
   id: "dry-season-duration",
@@ -47,6 +47,7 @@ export const PropertiesPlugin: IEditorPlugin<Singletons, Singletons> = {
   group: "General",
   enabled: true,
   Preview: ({ saveData }) => {
+    console.log(saveData);
     return <div>
       {fields.map((_) => <div key={_.id}>{_.label}: <strong>{get(saveData.Singletons, _.path)}</strong></div>)}
     </div>;
