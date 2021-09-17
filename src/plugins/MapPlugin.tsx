@@ -59,7 +59,8 @@ const BEAVER_ENTITIES = [
 ]
 
 const PATH_ENTITIES = [
-  "Path.Folktails"
+  "Path.Folktails",
+  "Path.IronTeeth",
 ]
 
 const EDITABLE_ENTITIES = [
@@ -179,7 +180,6 @@ export const MapPlugin: IEditorPlugin<State, State> = {
 
     const selectEntityId = useCallback((id: string|null) => {
       if (selectedEntityId && id) {
-        alert("Cannot select new entity when editing another one.");
         return;
       }
       setSelectedEntityId(id);

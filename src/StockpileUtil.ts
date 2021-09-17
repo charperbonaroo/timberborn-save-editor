@@ -23,6 +23,21 @@ const stockpileTypes = [{
 }, {
   id: "LargeWarehouse.Folktails",
   capacity: 1000,
+}, {
+  id: "SmallWarehouse.IronTeeth",
+  capacity: 200,
+}, {
+  id: "SmallWaterTank.IronTeeth",
+  capacity: 30,
+}, {
+  id: "LargeWaterTank.IronTeeth",
+  capacity: 300,
+}, {
+  id: "IndustrialLogPile.IronTeeth",
+  capacity: 180,
+}, {
+  id: "LargeWarehouse.IronTeeth",
+  capacity: 1000,
 }];
 
 const stockpileIds = stockpileTypes.map(_ => _.id)
