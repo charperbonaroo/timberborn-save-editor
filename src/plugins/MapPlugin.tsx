@@ -1,12 +1,12 @@
 import { BeaverAdultEntity, DemoSave, UnknownEntity } from "../DemoSave";
 import { IEditorPlugin } from "../IEditorPlugin";
 import { Canvas } from '@react-three/fiber'
-import { FormEvent, useCallback, useMemo, useState } from "react";
+import { FormEvent, useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import lodash, { compact, get, set, toPairs, uniq } from "lodash";
 import { MapControls } from "@react-three/drei";
 import './MapPlugin.scss';
 import { Navbar } from "../Navbar";
-import { BoxBufferGeometry, BufferGeometry, ConeBufferGeometry, Mesh, MeshStandardMaterial, PlaneBufferGeometry } from "three";
+import { BoxBufferGeometry, BufferGeometry, ConeBufferGeometry, CylinderBufferGeometry, Mesh, MeshStandardMaterial, PlaneBufferGeometry } from "three";
 import { EffectComposer, SSAO as _SSAO } from "@react-three/postprocessing";
 import { deepCopy } from "../deepCopy";
 import { StockpileUtil } from "../StockpileUtil";
@@ -61,10 +61,25 @@ const BEAVER_ENTITIES = [
 const PATH_ENTITIES = [
   "Path.Folktails",
   "Path.IronTeeth",
+  "Slope",
+  "WoodenStairs.Folktails",
+  "WoodenStairs.IronTeeth",
+  "DistrictGate.Folktails",
+  "DistrictGate.IronTeeth",
+]
+
+const PLATFORM_ENTITIES = [
+  "Platform.Folktails",
+  "Platform.IronTeeth",
+  "DoublePlatform.Folktails",
+  "DoublePlatform.IronTeeth",
+  "TriplePlatform.Folktails",
+  "TriplePlatform.IronTeeth",
 ]
 
 const EDITABLE_ENTITIES = [
-  ...STOCKPILE_ENTITIES, ...TREE_ENTITIES, ...BEAVER_ENTITIES, ...PATH_ENTITIES
+  ...STOCKPILE_ENTITIES, ...TREE_ENTITIES, ...BEAVER_ENTITIES, ...PATH_ENTITIES,
+  ...PLATFORM_ENTITIES,
 ];
 
 const useEntitiesOfTypes = (entityData: EntityData, templateIds: string[]) => {
@@ -206,6 +221,7 @@ export const MapPlugin: IEditorPlugin<State, State> = {
             <SlowBoxesHeightMap {...state} />
             <SlowBoxesWaterMap {...state} />
             <TreesMap {...state} />
+            <PlatformsMap {...state} />
             <PathsMap {...state} />
             <StockpilesMap {...state} selectEntityId={selectEntityId} selectedEntity={selectedEntity} setEntity={setEntity} />
             <BeaversMap {...state} selectEntityId={selectEntityId} selectedEntity={selectedEntity} setEntity={setEntity} />
@@ -303,18 +319,58 @@ function Stockpile({ stockpile, selectEntityId, selected }: { selected: boolean,
 
   const pos = (stockpile.Components as any).BlockObject.Coordinates;
   const x: number = pos.X;
-  const y: number = pos.Z + 0.5;
+  const y: number = pos.Z;
   const z: number = pos.Y;
 
-  return <mesh onPointerEnter={onPointerEnter} onPointerLeave={onPointerLeave} onClick={onClick} key={stockpile.Id} position={[x, y, z]}>
-    <meshStandardMaterial color={selected ? "#651FFF" : (isHover ? "#FF8A65" : "#E64A19")} />
-    <boxBufferGeometry args={[
-      (isHover || selected) ? 1.4 : 1.0,
-      (isHover || selected) ? 1.2 : 1.0,
-      (isHover || selected) ? 1.4 : 1.0,
-      8.0,
-      8.0,
-    ]} />
+  const meshRef = useRef<Mesh>();
+  const template = stockpile.Template;
+
+  useLayoutEffect(() => {
+    if (!meshRef.current) {
+      return;
+    }
+    let sizeX = 3;
+    let sizeY = 1;
+    let sizeZ = 2;
+    let geom: BufferGeometry|null = null;
+
+    if (/UndergroundWarehouse/.test(template)) {
+      sizeZ = 3;
+      sizeY = 3;
+    } else if (/Log/.test(template)) {
+      sizeZ = 3;
+      sizeY = 0.1;
+    } else if (/LargeWarehouse/.test(template)) {
+      sizeZ = 3;
+
+      geom = BufferGeometryUtils.mergeBufferGeometries([
+        new BoxBufferGeometry(sizeX, sizeY, sizeZ, 1.0, 1.0),
+        new BoxBufferGeometry(1, sizeY, sizeZ, 1.0, 1.0).translate(0, 1, 0),
+      ])
+    } else if (/LargeWaterTank/.test(template)) {
+      sizeY = 3
+      geom = BufferGeometryUtils.mergeBufferGeometries([
+        new CylinderBufferGeometry(1.0, 1.0, sizeY, 8, 8, false).translate(0.5, 0, 0),
+        new BoxBufferGeometry(2, 1, 1, 1.0, 1.0).translate(-0.5, -1, 0.5),
+      ])
+    }
+
+    if (!geom) {
+      geom = new BoxBufferGeometry(sizeX, sizeY, sizeZ, 1.0, 1.0);
+    }
+
+    if (isHover || selected) {
+      geom.scale(1.0 + 0.1 / sizeX, 1.0 + 0.1 / sizeY, 1.0 + 0.1 / sizeZ);
+    }
+
+    geom.translate(sizeX / 2 - 0.5, sizeY / 2, sizeZ / 2 - 0.5);
+    rotate(geom, stockpile);
+
+    meshRef.current.geometry = geom;
+  }, [stockpile, template, selected, isHover]);
+
+  return <mesh ref={meshRef} onPointerEnter={onPointerEnter} onPointerLeave={onPointerLeave} onClick={onClick} key={stockpile.Id} position={[x, y, z]}>
+    <meshStandardMaterial opacity={0.9} transparent color={selected ? "#651FFF" : (isHover ? "#FF8A65" : "#E64A19")} />
   </mesh>;
 }
 
@@ -401,26 +457,81 @@ function createTreeGeom({ dry, dead, adult, x, y, z }: {
     .translate(x, y + 0.5, z)
 }
 
-function meshWithColorFromGeoms(geometries: any[], color: string) {
+function meshWithColorFromGeoms(geometries: any[], color: string, opacity: number = 1.0) {
   if (geometries.length === 0) {
     return new Mesh();
   }
   const geom = BufferGeometryUtils.mergeBufferGeometries(geometries)
-  const mat = new MeshStandardMaterial({ color });
+  const mat = new MeshStandardMaterial({ color, opacity, transparent: opacity <= 0.99 });
   return new Mesh(geom, mat);
+}
+
+function getEntityRotationY(entity: UnknownEntity): number {
+  const orientationMatch = (entity as any).Components.BlockObject.Orientation?.Value?.match(/Cw(\d+)/);
+  if (orientationMatch) {
+    return parseFloat(orientationMatch[1]) / 180 * Math.PI;
+  } else {
+    return 0
+  }
+}
+
+function rotate(geom: BufferGeometry, entity: UnknownEntity) {
+  return geom.rotateY(getEntityRotationY(entity));
 }
 
 function PathsMap({ entityData }: State) {
   const paths = useEntitiesOfTypes(entityData, PATH_ENTITIES);
-  const geom = useMemo(() => meshWithColorFromGeoms(paths
-    .map((_: any) => new PlaneBufferGeometry(1, 1, 1, 1)
-      .rotateX(-Math.PI/2)
-      .translate(
+  const mesh = useMemo(() => meshWithColorFromGeoms(paths
+    .map((_: any) => {
+      let geom: BufferGeometry|null = null;
+      if (/Slope|Stairs/.test(_.Template)) {
+        geom = new PlaneBufferGeometry(1, 1.44, 1, 1).rotateX(-Math.PI/4).translate(0, 0.6, 0)
+        geom = rotate(geom, _);
+      } else if (/DistrictGate/.test(_.Template)) {
+        geom = BufferGeometryUtils.mergeBufferGeometries([
+          new PlaneBufferGeometry(1, 1, 1, 1).rotateX(-Math.PI/2).translate(0, 0.1, 0),
+          rotate(new BoxBufferGeometry(0.8, 1, 0.1, 1, 1, 1).translate(0, 0.5, 0), _),
+        ])
+      } else {
+        geom = new PlaneBufferGeometry(1, 1, 1, 1).rotateX(-Math.PI/2).translate(0, 0.1, 0)
+      }
+
+      return geom ? geom.translate(
         _.Components.BlockObject.Coordinates.X,
-        _.Components.BlockObject.Coordinates.Z + 0.1,
+        _.Components.BlockObject.Coordinates.Z,
         _.Components.BlockObject.Coordinates.Y
-      ),
-    ), "#BCAAA4"), [paths]);
+      ) : null;
+    }).filter(_ => _), "#BCAAA4", 0.8), [paths]);
+
+  return <primitive object={mesh} />;
+}
+
+function PlatformsMap({ entityData }: State) {
+  const paths = useEntitiesOfTypes(entityData, PLATFORM_ENTITIES);
+  const geom = useMemo(() => meshWithColorFromGeoms(paths
+    .map((_: any) => {
+      let geom: BufferGeometry|null = null;
+      let height = 1;
+      if (/DoublePlatform/.test(_.Template)) {
+        height = 2;
+      } else if (/TriplePlatform/.test(_.Template)) {
+        height = 3;
+      }
+      height -= 0.05;
+      geom = BufferGeometryUtils.mergeBufferGeometries([
+        new BoxBufferGeometry(0.1, height, 0.1, 1, 1, 1).translate(-0.4, height / 2, -0.4),
+        new BoxBufferGeometry(0.1, height, 0.1, 1, 1, 1).translate( 0.4, height / 2,  0.4),
+        new BoxBufferGeometry(0.1, height, 0.1, 1, 1, 1).translate( 0.4, height / 2, -0.4),
+        new BoxBufferGeometry(0.1, height, 0.1, 1, 1, 1).translate(-0.4, height / 2,  0.4),
+        new BoxBufferGeometry(0.95, 0.05, 0.95, 1, 1, 1).translate(0, height + 0.025, 0),
+      ]);
+
+      return geom ? geom.translate(
+        _.Components.BlockObject.Coordinates.X,
+        _.Components.BlockObject.Coordinates.Z,
+        _.Components.BlockObject.Coordinates.Y
+      ) : null;
+    }).filter(_ => _), "#A1887F"), [paths]);
 
   return <primitive object={geom} />;
 }
@@ -461,12 +572,12 @@ function SlowBoxesWaterMap({ mapData }: State) {
       if (y > 0) {
         acc.push(new PlaneBufferGeometry(1, 1, 1, 1)
           .rotateX(-Math.PI/2)
-          .translate(i2x(i), y + heightMap[i], i2y(i)));
+          .translate(i2x(i), y * 0.95 + 0.05 + heightMap[i], i2y(i)));
       }
       return acc;
     }, [] as BufferGeometry[]);
 
-    return meshWithColorFromGeoms(geoms, "#0044cc");
+    return meshWithColorFromGeoms(geoms, "#0044cc", 0.8);
   }, [i2x, i2y, heightMap, waterDepthMap])
 
   return <primitive object={mesh} />;
