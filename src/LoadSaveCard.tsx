@@ -1,3 +1,4 @@
+import JSZip from "jszip";
 import { FormEvent, useCallback, useState } from "react";
 import { deepCopy } from "./deepCopy";
 import { DemoSave } from "./DemoSave";
@@ -15,10 +16,10 @@ export function LoadSaveCard({ onSaveLoaded }: { onSaveLoaded: (save: DemoSave) 
       if (!file) {
         throw new Error(`Expected file to be uploaded, found none`);
       }
-      const reader = new FileReader();
-      reader.onload = (_event) => {
+
+      const loadJson = (json: string) => {
         try {
-          const data = JSON.parse(reader.result as string);
+          const data = JSON.parse(json);
           data.__originalFilename = file.name;
           onSaveLoaded(data);
         } catch (error) {
@@ -26,7 +27,24 @@ export function LoadSaveCard({ onSaveLoaded }: { onSaveLoaded: (save: DemoSave) 
           throw error;
         }
       }
-      reader.readAsText(file, "utf-8");
+
+      if (/\.json$/.test(file.name)) {
+        const reader = new FileReader();
+        reader.readAsText(file, "utf-8");
+        reader.onload = (_event) => {
+          loadJson(reader.result as string);
+        }
+      } else if (/\.timber$/.test(file.name)) {
+        new JSZip().loadAsync(file).then((zip) => {
+          const file = Object.values(zip.files)[0];
+          return file.async("string");
+        }).then((json) => {
+          loadJson(json);
+        }).catch((error) => {
+          setError(error);
+          throw error;
+        });
+      }
     } catch (error) {
       setError(error);
       throw error;
@@ -47,11 +65,12 @@ export function LoadSaveCard({ onSaveLoaded }: { onSaveLoaded: (save: DemoSave) 
             <h1 className="card-title">Timberborn Save Editor</h1>
             <div className="mb-3 mt-4">
               <span className="form-label">Upload your <b>Demo save</b> to start</span>
-              <input type="file" name="save" accept=".json" onInput={onInput} className="form-control" />
+              <input type="file" name="save" accept=".json,.timber" onInput={onInput} className="form-control" />
               {error
                 ? <small className="form-text">{`#{error}`}</small>
                 : <small className="form-text">Default directory: <code>%USERPROFILE%\Documents\Timberborn\Saves\</code></small>}
             </div>
+            <b>Now works with <code>.timber</code> files!</b>
           </label>
           <div className="card-body">
             <small className="form-text">Or load an example save</small>
