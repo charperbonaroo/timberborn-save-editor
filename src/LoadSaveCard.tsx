@@ -7,11 +7,11 @@ const exmapleLetsPlay = require("./examples/lets-play-plains.json");
 const exampleIronTeeth = require("./examples/iron-teeth-plains-1-1.json");
 
 export function LoadSaveCard({ onSaveLoaded }: { onSaveLoaded: (save: DemoSave) => void }) {
-  const [ error, setError ] = useState<unknown>();
+  const [error, setError] = useState<unknown>();
 
   const onInput = useCallback((event: FormEvent<HTMLInputElement>) => {
     try {
-      const fileList = (event.target as HTMLInputElement|null)?.files;
+      const fileList = (event.target as HTMLInputElement | null)?.files;
       const file = fileList?.item(0);
       if (!file) {
         throw new Error(`Expected file to be uploaded, found none`);
@@ -21,6 +21,7 @@ export function LoadSaveCard({ onSaveLoaded }: { onSaveLoaded: (save: DemoSave) 
         try {
           const data = JSON.parse(json);
           data.__originalFilename = file.name;
+          console.log(data);
           onSaveLoaded(data);
         } catch (error) {
           setError(error);
@@ -89,7 +90,7 @@ export function LoadSaveCard({ onSaveLoaded }: { onSaveLoaded: (save: DemoSave) 
             {" "}
             <a className="btn btn-sm btn-link" href="mailto:toby@bonaroo.nl">Contact</a>
             {" "}
-            <span className="btn-sm" style={{display: "inline-block", lineHeight: "1.5", verticalAlign: "middle"}}>Discord: <b>gamebuster800#2213</b></span>
+            <span className="btn-sm" style={{ display: "inline-block", lineHeight: "1.5", verticalAlign: "middle" }}>Discord: <b>gamebuster800#2213</b></span>
           </small>
         </div>
       </div>

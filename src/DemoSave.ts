@@ -15,7 +15,7 @@ export interface DemoSave {
     CameraStateRestorer: unknown,
     WaterMap: {WaterDepths: {Array: string}, Outflows: {Array: string}},
     SoilMoistureSimulator: {MoistureLevels: {Array: string}},
-    NameService: {Names: string[]},
+    BeaverNameService: {Names: string[]},
     WorkingHoursManager: {WorkedPartOfDay: number},
     WellbeingHighscore: {AverageWellbeingHighscore: number},
     FactionService: {Id: string},

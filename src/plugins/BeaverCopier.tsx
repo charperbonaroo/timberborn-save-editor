@@ -25,12 +25,12 @@ export const BeaverCopier: IEditorPlugin<DemoSave, DemoSave> = {
   },
 
   Editor({ initialData, onClose, onSubmit }) {
-    const [ beavers, setBeavers ] = useState(() => initialData.Entities.filter(_ => _.Template === "BeaverChild" || _.Template === "BeaverAdult"))
-    const [ page, setPage ] = useState(0);
-    const [ pageSize, setPageSize ] = useState(25);
-    const [ targetAmount, setTargetAmount ] = useState(70);
+    const [beavers, setBeavers] = useState(() => initialData.Entities.filter(_ => _.Template === "BeaverChild" || _.Template === "BeaverAdult"))
+    const [page, setPage] = useState(0);
+    const [pageSize, setPageSize] = useState(25);
+    const [targetAmount, setTargetAmount] = useState(70);
 
-    const sortedBeavers = sortBy(beavers.slice(), _ => -(_ as any).Components.Beaver.DayOfBirth);
+    const sortedBeavers = sortBy(beavers.slice(), _ => -(_ as any).Components.Character.DayOfBirth);
 
     const offset = page * pageSize;
 
@@ -89,19 +89,19 @@ export const BeaverCopier: IEditorPlugin<DemoSave, DemoSave> = {
           <thead>
             <tr>
               <th>Name</th>
-              <th>Age <small style={{fontWeight: "normal"}}>a-z</small></th>
+              <th>Age <small style={{ fontWeight: "normal" }}>a-z</small></th>
               <th>Coordinates</th>
               <th></th>
             </tr>
           </thead>
           <tbody>
             {sortedBeavers.slice(offset, offset + pageSize).map((beaver: any) => <tr key={beaver.Id}>
-              <td>{beaver.Components.Beaver.Name}</td>
-              <td>{initialData.Singletons.DayNightCycle.DayNumber - beaver.Components.Beaver.DayOfBirth} {beaver.Template === "BeaverChild" ? <small>(child)</small> : null}</td>
+              <td>{beaver.Components.Character.Name}</td>
+              <td>{initialData.Singletons.DayNightCycle.DayNumber - beaver.Components.Character.DayOfBirth} {beaver.Template === "BeaverChild" ? <small>(child)</small> : null}</td>
               <td>
-                x: <b>{Math.round(beaver.Components.Beaver.Position.X)}</b>{" "}
-                y: <b>{Math.round(beaver.Components.Beaver.Position.Y)}</b>{" "}
-                z: <b>{Math.round(beaver.Components.Beaver.Position.Z)}</b>{" "}
+                x: <b>{Math.round(beaver.Components.Character.Position.X)}</b>{" "}
+                y: <b>{Math.round(beaver.Components.Character.Position.Y)}</b>{" "}
+                z: <b>{Math.round(beaver.Components.Character.Position.Z)}</b>{" "}
               </td>
               <td className="text-end py-1">
                 <button type="button" className="btn btn-light btn-sm" onClick={() => duplicate(beaver)}>Copy</button>
@@ -118,7 +118,7 @@ export const BeaverCopier: IEditorPlugin<DemoSave, DemoSave> = {
                   <form className="me-3 d-flex" onSubmit={(event) => { event.preventDefault(); doSetBeaverCount(); }}>
                     <label className="form-label me-1 mt-1 mb-0" htmlFor="addRandom">Set beavers</label>
                     <input type="number" id="addRandom" className="form-control form-control-sm" value={targetAmount}
-                      onChange={(event) => { setTargetAmount(parseInt(event.target.value, 10)) }} width={3} style={{width: 80}} />
+                      onChange={(event) => { setTargetAmount(parseInt(event.target.value, 10)) }} width={3} style={{ width: 80 }} />
                     <button type="submit" className="ms-1 btn btn-primary btn-sm">Set</button>
                   </form>
                   <div className="me-3 d-flex">
@@ -133,9 +133,9 @@ export const BeaverCopier: IEditorPlugin<DemoSave, DemoSave> = {
                     </select>
                   </div>
                   <div>
-                    <button className="btn btn-sm btn-light" disabled={page<=0} onClick={() => setPage(page-1)}>&lsaquo; prev</button>
+                    <button className="btn btn-sm btn-light" disabled={page <= 0} onClick={() => setPage(page - 1)}>&lsaquo; prev</button>
                     {" "}
-                    <button className="btn btn-sm btn-light" disabled={!hasNextPage} onClick={() => setPage(page+1)}>next &rsaquo;</button>
+                    <button className="btn btn-sm btn-light" disabled={!hasNextPage} onClick={() => setPage(page + 1)}>next &rsaquo;</button>
                   </div>
                 </div>
               </td>
@@ -147,8 +147,8 @@ export const BeaverCopier: IEditorPlugin<DemoSave, DemoSave> = {
   }
 }
 
-function BeaverStatus({entities}: {entities: DemoSaveEntity[]}) {
-  const {adultCount, childCount} = entities.reduce((acc, entity) => {
+function BeaverStatus({ entities }: { entities: DemoSaveEntity[] }) {
+  const { adultCount, childCount } = entities.reduce((acc, entity) => {
     if (entity.Template === "BeaverAdult") {
       acc.adultCount++;
     }
@@ -158,7 +158,7 @@ function BeaverStatus({entities}: {entities: DemoSaveEntity[]}) {
     return acc;
   }, { adultCount: 0, childCount: 0 })
 
-  const sum = adultCount+childCount;
+  const sum = adultCount + childCount;
 
   return <span>You have <strong>{sum}</strong> beavers: <strong>{childCount}</strong> kits and <strong>{adultCount}</strong> adults.</span>;
 
