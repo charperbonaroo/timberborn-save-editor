@@ -5,7 +5,7 @@ import { UUID } from "./util/UUID";
 export const BeaverUtil = {
   setAge(saveData: DemoSave, beaver: UnknownEntity, age: number) {
     const dayNumber = saveData.Singletons.DayNightCycle.DayNumber;
-    (beaver.Components.Beaver as any).DayOfBirth = Math.floor(dayNumber - age);
+    (beaver.Components.Character as any).DayOfBirth = Math.floor(dayNumber - age);
   },
 
   /**
@@ -22,8 +22,8 @@ export const BeaverUtil = {
   },
 
   setDefaultName(saveData: DemoSave, beaver: UnknownEntity): void {
-    const names = saveData.Singletons.NameService.Names;
-    (beaver.Components.Beaver as any).Name = sample(names);
+    const names = saveData.Singletons.BeaverNameService.Names;
+    (beaver.Components.Character as any).Name = sample(names);
   },
 
   reset(beaver: UnknownEntity) {
