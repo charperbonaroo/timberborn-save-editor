@@ -26,6 +26,10 @@ export const BeaverUtil = {
     (beaver.Components.Character as any).Name = sample(names);
   },
 
+  setName(beaver: UnknownEntity, name: string): void {
+    (beaver.Components.Character as any).Name = name;
+  },
+
   reset(beaver: UnknownEntity) {
     beaver.Id = UUID();
     BeaverUtil.setDefaultNeeds(beaver);
