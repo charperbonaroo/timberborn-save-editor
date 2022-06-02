@@ -8,7 +8,7 @@ export const StockpilePlugin: IEditorPlugin<DemoSave, DemoSave> = {
   id: "StockpilePlugin",
   name: "Manage stockpile inventories",
   group: "Storage",
-  position: 10,
+  position: 20,
   enabled: true,
 
   read: (save) => save,
