@@ -10,10 +10,12 @@ import { BoxBufferGeometry, BufferGeometry, ConeBufferGeometry, CylinderBufferGe
 import { EffectComposer, SSAO as _SSAO } from "@react-three/postprocessing";
 import { deepCopy } from "../deepCopy";
 import { StockpileUtil } from "../StockpileUtil";
+import { entities } from "../allEntities";
 
 const SSAO = _SSAO as any;
 const { BlendFunction } = require("postprocessing") as any;
 const BufferGeometryUtils = require('three/examples/jsm/utils/BufferGeometryUtils.js') as any;
+const { TREE_ENTITIES, BEAVER_ENTITIES, PATH_ENTITIES, PLATFORM_ENTITIES, STORAGE_ENTITIES: STOCKPILE_ENTITIES } = entities;
 
 interface State {
   saveData: DemoSave;
@@ -45,37 +47,6 @@ interface EntityData {
   entitiesByIds: Record<string, UnknownEntity>;
   entitiesIdsByTemplate: Record<string, string[]>;
 }
-
-const STOCKPILE_ENTITIES = StockpileUtil.stockpileTypes.map(_ => _.id);
-const TREE_ENTITIES = [
-  "Maple",
-  "Pine",
-  "Birch",
-]
-
-const BEAVER_ENTITIES = [
-  "BeaverAdult",
-  "BeaverChild",
-]
-
-const PATH_ENTITIES = [
-  "Path.Folktails",
-  "Path.IronTeeth",
-  "Slope",
-  "WoodenStairs.Folktails",
-  "WoodenStairs.IronTeeth",
-  "DistrictGate.Folktails",
-  "DistrictGate.IronTeeth",
-]
-
-const PLATFORM_ENTITIES = [
-  "Platform.Folktails",
-  "Platform.IronTeeth",
-  "DoublePlatform.Folktails",
-  "DoublePlatform.IronTeeth",
-  "TriplePlatform.Folktails",
-  "TriplePlatform.IronTeeth",
-]
 
 const EDITABLE_ENTITIES = [
   ...STOCKPILE_ENTITIES, ...TREE_ENTITIES, ...BEAVER_ENTITIES, ...PATH_ENTITIES,

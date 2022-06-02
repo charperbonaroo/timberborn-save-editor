@@ -1,5 +1,5 @@
 import { sample, sortBy } from "lodash";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useMemo } from "react";
 import { BeaverUtil } from "../BeaverUtil";
 import { deepCopy } from "../deepCopy";
 import { DemoSave, DemoSaveEntity, UnknownEntity } from "../DemoSave";
@@ -29,6 +29,7 @@ export const BeaverCopier: IEditorPlugin<DemoSave, DemoSave> = {
     const [page, setPage] = useState(0);
     const [pageSize, setPageSize] = useState(25);
     const [targetAmount, setTargetAmount] = useState(70);
+    const [beaverId, setBeaverId] = useState<string | null>(null);
 
     const sortedBeavers = sortBy(beavers.slice(), _ => -(_ as any).Components.Character.DayOfBirth);
 
@@ -70,6 +71,19 @@ export const BeaverCopier: IEditorPlugin<DemoSave, DemoSave> = {
       setBeavers(newBeavers);
     }, [beavers, targetAmount, copyBeaver]);
 
+    const editingBeaver = useMemo(() => beavers.find(_ => _.Id === beaverId), [beavers, beaverId]);
+
+    const updateBeaver = useCallback((patch: any) => {
+      const index = beavers.findIndex(_ => _.Id === beaverId);
+      const newBeaver = deepCopy(beavers[index]);
+      if (patch.Name) {
+        BeaverUtil.setName(newBeaver, patch.Name);
+      }
+      const newBeavers = beavers.slice();
+      newBeavers[index] = newBeaver;
+      setBeavers(newBeavers);
+    }, [beaverId, beavers]);
+
     return <div className="container my-4">
       <div className="card">
         <div className="card-body">
@@ -83,6 +97,9 @@ export const BeaverCopier: IEditorPlugin<DemoSave, DemoSave> = {
               {" "}
               <button type="button" onClick={doSubmit} className="btn btn-primary">Submit</button>
             </div>
+          </div>
+          <div className={["collapse", beaverId ? "show" : ""].join(" ")}>
+            {beaverId && <BeaverEditor beaver={editingBeaver} updateBeaver={updateBeaver} />}
           </div>
         </div>
         <table className="table my-0">
@@ -104,6 +121,7 @@ export const BeaverCopier: IEditorPlugin<DemoSave, DemoSave> = {
                 z: <b>{Math.round(beaver.Components.Character.Position.Z)}</b>{" "}
               </td>
               <td className="text-end py-1">
+                <button type="button" onClick={() => setBeaverId(beaver.Id)} className="btn btn-light btn-sm">Edit</button>
                 <button type="button" className="btn btn-light btn-sm" onClick={() => duplicate(beaver)}>Copy</button>
               </td>
             </tr>)}
@@ -161,5 +179,27 @@ function BeaverStatus({ entities }: { entities: DemoSaveEntity[] }) {
   const sum = adultCount + childCount;
 
   return <span>You have <strong>{sum}</strong> beavers: <strong>{childCount}</strong> kits and <strong>{adultCount}</strong> adults.</span>;
+}
 
+function BeaverEditor({ beaver, updateBeaver }: { beaver?: any, updateBeaver: (patch: any) => void }) {
+  const [beaverData, setBeaverData] = useState(deepCopy(beaver.Components.Character));
+  const onSubmit = useCallback((e) => {
+    e.preventDefault();
+    updateBeaver(beaverData);
+  }, [beaverData, updateBeaver]);
+
+  const updateBeaverData = useCallback((property: string, value: any) => {
+    setBeaverData({ ...beaverData, [property]: value });
+  }, [beaverData]);
+
+  if (!beaver) return <div className="text-danger p-1">Invalid beaver selected!</div>;
+
+  return <>
+    <h2>Edit beaver</h2>
+    <form className="my-3 d-flex" onSubmit={onSubmit}>
+      <label className="form-label me-1 mt-1 mb-0" htmlFor="beaverEditName">Name</label>
+      <input className="form-control form-control-sm" id="beaverEditName" value={beaverData.Name} minLength={1} onChange={(e) => updateBeaverData("Name", e.target.value)} />
+      <button name="submit" type="submit" className="btn btn-primary btn-sm ms-auto">Update</button>
+    </form>
+  </>;
 }

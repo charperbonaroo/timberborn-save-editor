@@ -8,7 +8,7 @@ export const StockpilePlugin: IEditorPlugin<DemoSave, DemoSave> = {
   id: "StockpilePlugin",
   name: "Manage stockpile inventories",
   group: "Storage",
-  position: 10,
+  position: 20,
   enabled: true,
 
   read: (save) => save,
@@ -92,6 +92,16 @@ function StockpileForm({ stockpile, setStockpile }: { stockpile: UnknownEntity, 
   const totalCounts = sum(map(values(counts), _ => _ || 0));
   const capacity = StockpileUtil.getCapacity(stockpile) ?? 0;
 
+  const fillToCapacity = useCallback((capacity: number) => {
+    const initialMaxGood = Math.floor(capacity / goods.length);
+    let remainder = capacity - initialMaxGood * goods.length; // Seems slightly faster than modulo
+    const newCounts: Record<string, number> = {};
+    goods.forEach((good: string) => {
+      newCounts[good] = initialMaxGood + (remainder-- > 0 ? 1 : 0);
+    });
+    setCounts(newCounts);
+  }, [goods]);
+
   return <div className="list-group-item">
     <div className="d-flex">
       <div>
@@ -116,7 +126,16 @@ function StockpileForm({ stockpile, setStockpile }: { stockpile: UnknownEntity, 
             {totalCounts > capacity
               ? <div className="text-danger p-1">Warning: <strong>{totalCounts}</strong> storage exceeds capacity of <strong>{capacity}</strong>!</div>
               : <div className="p-1"><strong>{totalCounts}</strong> / <strong>{capacity}</strong></div>}
-            <button type="submit" name="submit" value="all" className="ms-auto btn btn-danger btn-sm">OK &amp; update all</button>
+            <button
+              className="ms-auto btn btn-secondary btn-sm"
+              onClick={(e) => {
+                e.preventDefault();
+                fillToCapacity(capacity);
+              }}
+            >
+              Fill
+            </button>
+            <button type="submit" name="submit" value="all" className="ms-1 btn btn-danger btn-sm">OK &amp; update all</button>
           </div>
         </div>
       </form>

@@ -44,6 +44,7 @@ const stockpileIds = stockpileTypes.map(_ => _.id)
 
 export const StockpileUtil = {
   stockpileTypes,
+  stockpileIds,
   getCapacity: (stockpile: UnknownEntity) => stockpileTypes.find(_ => _.id === stockpile.Template)?.capacity,
   getStockpiles: (saveData: DemoSave) => saveData.Entities.filter(_ => stockpileIds.includes(_.Template)),
   countGoods: (stockpile: UnknownEntity, accumulator = {} as Record<string, number>) => (((stockpile.Components["Inventory:Stockpile"] as any)?.Storage?.Goods || []) as StockpileGoodsEntry[])
