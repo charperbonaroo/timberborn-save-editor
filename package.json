@@ -58,5 +58,6 @@
     "@types/lodash": "^4.14.172",
     "@types/three": "^0.131.0",
     "gh-pages": "^3.2.3"
-  }
+  },
+  "packageManager": "yarn@3.3.1"
 }
