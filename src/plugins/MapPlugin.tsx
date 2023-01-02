@@ -4,16 +4,13 @@ import { Canvas } from '@react-three/fiber'
 import { FormEvent, useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import lodash, { compact, get, set, toPairs, uniq } from "lodash";
 import { MapControls } from "@react-three/drei";
-import './MapPlugin.scss';
+import './MapPlugin.css';
 import { Navbar } from "../Navbar";
 import { BoxBufferGeometry, BufferGeometry, ConeBufferGeometry, CylinderBufferGeometry, Mesh, MeshStandardMaterial, PlaneBufferGeometry } from "three";
-import { EffectComposer, SSAO as _SSAO } from "@react-three/postprocessing";
 import { deepCopy } from "../deepCopy";
 import { StockpileUtil } from "../StockpileUtil";
 import { entities } from "../allEntities";
 
-const SSAO = _SSAO as any;
-const { BlendFunction } = require("postprocessing") as any;
 const BufferGeometryUtils = require('three/examples/jsm/utils/BufferGeometryUtils.js') as any;
 const { TREE_ENTITIES, BEAVER_ENTITIES, PATH_ENTITIES, PLATFORM_ENTITIES, STORAGE_ENTITIES: STOCKPILE_ENTITIES } = entities;
 
@@ -177,12 +174,12 @@ export const MapPlugin: IEditorPlugin<State, State> = {
 
       <Canvas className="Map__Canvas" camera={{ position: [32, 64, -64] }}>
         <EffectComposer>
-          <SSAO
+          {/* <SSAO
             blendFunction={BlendFunction.MULTIPLY}
             samples={50}
             radius={2}
             intensity={30}
-          />
+          /> */}
         </EffectComposer>
         <axesHelper position={[0, 8, 0]} scale={[4, 4, 4]} />
         <ambientLight intensity={0.3} />

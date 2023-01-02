@@ -9,7 +9,7 @@
 /coverage
 
 # production
-/build
+/public/assets
 
 # misc
 .DS_Store
@@ -23,8 +23,8 @@ yarn-debug.log*
 yarn-error.log*
 
 # https://yarnpkg.com/getting-started/qa#which-files-should-be-gitignored
-.pnp.*
 .yarn/*
+!.yarn/cache
 !.yarn/patches
 !.yarn/plugins
 !.yarn/releases
