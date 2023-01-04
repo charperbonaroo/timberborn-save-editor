@@ -305,7 +305,11 @@ function Stockpile({ stockpile, selectEntityId, selected }: { selected: boolean,
     let sizeZ = 2;
     let geom: BufferGeometry | null = null;
 
-    if (/UndergroundWarehouse/.test(template)) {
+    if (/SmallWarehouseNew/.test(template)) {
+      sizeX = 1;
+      sizeZ = 1;
+      sizeY = 1;
+    } else if (/UndergroundWarehouse/.test(template)) {
       sizeZ = 3;
       sizeY = 3;
     } else if (/Log/.test(template)) {
@@ -379,7 +383,7 @@ function Beaver({ beaver, selectEntityId, selected }: { selected: boolean, beave
 }
 
 function StockpileForm({ selectedEntity, selectEntityId, setEntity }: MutableState) {
-  const goodIds = useMemo(() => (selectedEntity as any).Components.GoodDesirer.DesiredGoods.map((_: any) => _.Good.Id), [selectedEntity]) as string[];
+  const goodIds: string[] = useMemo(() => selectedEntity ? [(selectedEntity.Components.SingleGoodAllower as any).AllowedGood?.Id].filter(_ => _) : [], [selectedEntity]);
   const [countGoods, setCountGoods] = useState<Record<string, number>>(() => StockpileUtil.countGoods(selectedEntity!, {}));
   const capacity = StockpileUtil.getCapacity(selectedEntity!)!;
   const totalCounts = Object.values(countGoods).reduce((a, b) => a + b, 0);
