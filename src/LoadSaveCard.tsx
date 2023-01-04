@@ -65,7 +65,7 @@ export function LoadSaveCard({ onSaveLoaded }: { onSaveLoaded: (save: DemoSave) 
             <small className="text-danger">A very unofficial &amp; third-party</small>
             <h1 className="card-title">Timberborn Save Editor</h1>
             <div className="mb-3 mt-4">
-              <span className="form-label">Upload your <b>Demo save</b> to start</span>
+              <span className="form-label">Upload your save file to start</span>
               <input type="file" name="save" accept=".json,.timber" onInput={onInput} className="form-control" />
               {error
                 ? <small className="form-text">{`#{error}`}</small>

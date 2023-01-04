@@ -1,4 +1,4 @@
-import { assign, chunk, fill, groupBy, map, mapValues, sum, toPairs, uniq, values } from "lodash";
+import { assign, chunk, fill, groupBy, map, mapValues, sum, toPairs, values } from "lodash";
 import { FormEvent, Fragment, useCallback, useMemo, useState } from "react";
 import { DemoSave, UnknownEntity } from "../DemoSave";
 import { IEditorPlugin } from "../IEditorPlugin";
@@ -15,7 +15,7 @@ export const StockpilePlugin: IEditorPlugin<DemoSave, DemoSave> = {
   write: (_, data) => data,
 
   Preview: ({ saveData }) => {
-    console.log(uniq(saveData.Entities.filter((_) => _.Components["Inventory:Stockpile"]).map(_ => _.Template)))
+    (window as any).__saveData = saveData;
     const stockpiles = useMemo(() => StockpileUtil.getStockpiles(saveData), [saveData]);
     const allGoods = useMemo(() => stockpiles.reduce((acc, stockpile) => StockpileUtil.countGoods(stockpile, acc), {} as Record<string, number>), [stockpiles]);
 
@@ -25,10 +25,10 @@ export const StockpilePlugin: IEditorPlugin<DemoSave, DemoSave> = {
   },
 
   Editor: ({ initialData, onClose, onSubmit }) => {
-    const [ stockpileId, setStockpileId ] = useState<string|null>(null);
-    const [ stockpiles, setStockpiles ] = useState(() => StockpileUtil.getStockpiles(initialData));
+    const [stockpileId, setStockpileId] = useState<string | null>(null);
+    const [stockpiles, setStockpiles] = useState(() => StockpileUtil.getStockpiles(initialData));
 
-    const setStockpile = useCallback((type: "self"|"all", stockpile: UnknownEntity) => {
+    const setStockpile = useCallback((type: "self" | "all", stockpile: UnknownEntity) => {
       setStockpiles(stockpiles.slice().map((_) => (type === "all" ? _.Template === stockpile.Template : _.Id === stockpile.Id) ? {
         ..._,
         Components: { ..._.Components, "Inventory:Stockpile": stockpile.Components["Inventory:Stockpile"] }
@@ -64,9 +64,9 @@ export const StockpilePlugin: IEditorPlugin<DemoSave, DemoSave> = {
   }
 }
 
-function StockpileForm({ stockpile, setStockpile }: { stockpile: UnknownEntity, setStockpile: (type: "self"|"all", stockpile: UnknownEntity) => void }) {
-  const goods: string[] = useMemo(() => (stockpile.Components.GoodDesirer as any).DesiredGoods.map((_: any) => _.Good.Id), [stockpile]);
-  const [ counts, setCounts ] = useState(() => StockpileUtil.countGoods(stockpile));
+function StockpileForm({ stockpile, setStockpile }: { stockpile: UnknownEntity, setStockpile: (type: "self" | "all", stockpile: UnknownEntity) => void }) {
+  const goods: string[] = useMemo(() => [(stockpile.Components.SingleGoodAllower as any).AllowedGood?.Id].filter(_ => _), [stockpile]);
+  const [counts, setCounts] = useState(() => StockpileUtil.countGoods(stockpile));
 
   const onSubmit = useCallback((event: FormEvent) => {
     event.preventDefault();
@@ -77,7 +77,7 @@ function StockpileForm({ stockpile, setStockpile }: { stockpile: UnknownEntity, 
         ...stockpile.Components,
         "Inventory:Stockpile": {
           Storage: {
-            Goods: toPairs(counts).filter(([k,v]) => v && v > 0).map(([Id, Amount]) => ({ Good: {Id}, Amount }))
+            Goods: toPairs(counts).filter(([k, v]) => v && v > 0).map(([Id, Amount]) => ({ Good: { Id }, Amount }))
           }
         }
       }
@@ -106,7 +106,7 @@ function StockpileForm({ stockpile, setStockpile }: { stockpile: UnknownEntity, 
     <div className="d-flex">
       <div>
         <b>{stockpile.Template}</b>
-        <div style={{whiteSpace: "nowrap"}}>
+        <div style={{ whiteSpace: "nowrap" }}>
           x: <b>{Math.round((stockpile.Components.BlockObject as any).Coordinates.X)}</b>{" "}
           y: <b>{Math.round((stockpile.Components.BlockObject as any).Coordinates.Y)}</b>{" "}
           z: <b>{Math.round((stockpile.Components.BlockObject as any).Coordinates.Z)}</b>{" "}
@@ -148,7 +148,7 @@ function StockpileButton({ stockpile, setStockpileId }: { stockpile: UnknownEnti
     <div className="d-flex">
       <div>
         <b>{stockpile.Template}</b>
-        <div style={{whiteSpace: "nowrap"}}>
+        <div style={{ whiteSpace: "nowrap" }}>
           x: <b>{Math.round((stockpile.Components.BlockObject as any).Coordinates.X)}</b>{" "}
           y: <b>{Math.round((stockpile.Components.BlockObject as any).Coordinates.Y)}</b>{" "}
           z: <b>{Math.round((stockpile.Components.BlockObject as any).Coordinates.Z)}</b>{" "}
@@ -164,8 +164,8 @@ function StockpileInventoryTable({ counts }: { counts: Record<string, number> })
     <tbody>
       {chunk(toPairs(counts), 5).map((chunk, index) => <tr key={index}>
         {assign(fill(new Array(5), ["", ""]), chunk).map(([label, value], i) => <Fragment key={i}>
-          <th style={{width: "17%"}} className="text-end">{label}</th>
-          <td style={{width: "3%"}} className="text-end">{value}</td>
+          <th style={{ width: "17%" }} className="text-end">{label}</th>
+          <td style={{ width: "3%" }} className="text-end">{value}</td>
         </Fragment>)}
       </tr>)}
     </tbody>
