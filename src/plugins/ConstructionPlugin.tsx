@@ -37,6 +37,8 @@ export const ConstructionPlugin: IEditorPlugin<DemoSave, DemoSave> = {
   write: (_, data) => data,
 
   Preview: ({ saveData }) => {
+    (window as any).__saveData = saveData;
+    console.log(saveData);
     const constructionSites = useMemo(() => ConstructionUtil.getConstructionSites(saveData), [saveData]);
 
     const constructionGroups = useMemo(() => {
@@ -59,7 +61,6 @@ export const ConstructionPlugin: IEditorPlugin<DemoSave, DemoSave> = {
     const [sort, setSort] = useState<BuildingSort>({ column: "type", descending: false });
     const [filter, setFilter] = useState<BuildingFilter>({ column: "", value: "none" });
     const [constructionSites, setConstructionSites] = useState(() => deepCopy(ConstructionUtil.getConstructionSites(initialData)));
-    // const constructionSites = useMemo(() => ConstructionUtil.getConstructionSites(initialData), [initialData]);
     const buildingData = useMemo<BuildingDataDict>(() =>
       groupBy(constructionSites.map(({ Template, Id, Components }) =>
         ({ Template, type: ConstructionUtil.getBuildingType(Template), Id, coords: Components.BlockObject.Coordinates, finished: Components.Constructible.Finished } as BuildingData)
@@ -111,6 +112,17 @@ export const ConstructionPlugin: IEditorPlugin<DemoSave, DemoSave> = {
       }
     }, [constructionSites]);
 
+    const finishAll = useCallback((e) => {
+      const newSites = constructionSites.slice();
+      for (const info of sortedAndFiltered) {
+        const index = newSites.findIndex((_) => _.Id === info.Id);
+        if (index !== -1) {
+          ConstructionUtil.finishConstruction(newSites[index]);
+        }
+      }
+      setConstructionSites(newSites);
+    }, [sortedAndFiltered, constructionSites]);
+
     const doSubmit = useCallback(() => {
       const Entities = initialData.Entities
         .filter(ConstructionUtil.reverseEntityFilter)
@@ -131,8 +143,14 @@ export const ConstructionPlugin: IEditorPlugin<DemoSave, DemoSave> = {
             </div>
           </div>
           <div className="mt-3">Be careful when finishing only some construction sites. Finishing buildings without finished buildings below it will result in floating buildings and other weird behaviors!</div>
+          <div className="d-flex mt-3">
+            <ConstructionTableFilterForm onSubmit={setFilter} buildingData={buildingData} />
+            <div className="ms-auto">
+              <label className="mb-2">&nbsp;</label>
+              <button className="btn btn-primary d-block" onClick={finishAll}>Finish all</button>
+            </div>
+          </div>
         </div>
-        <ConstructionTableFilterForm onSubmit={setFilter} buildingData={buildingData} />
         <table className="table my-0">
           <thead>
             <tr>
@@ -162,7 +180,7 @@ export const ConstructionPlugin: IEditorPlugin<DemoSave, DemoSave> = {
           </tbody>
         </table>
       </div>
-    </div>;
+    </div >;
   },
 };
 
@@ -210,22 +228,25 @@ function ConstructionTableFilterForm({ onSubmit, buildingData }: { onSubmit: (fi
 
   return <form onSubmit={handleSubmit}>
     <div className="d-flex">
-      <div className="mx-3">
-        <label htmlFor="selectFilterType" className="mb-2">Filter construction sites by..</label>
+      <div className="me-1">
+        <label htmlFor="selectFilterType" className="mb-2">Filter by..</label>
         <select className="form-select" id="selectFilterType" onChange={(e) => setFilterType(e.target.value as "type" | "building" | "none")} value={filterType}>
           <option value="none" >None</option>
           <option value="type">Type</option>
           <option value="building">Building</option>
         </select>
       </div>
-      <div className="mx-3">
+      <div className="me-1">
         <label htmlFor="selectFilterValue" className="mb-2">With value..</label>
         <select className="form-select" id="selectFilterValue" disabled={filterType === "none"} onChange={(e) => setFilterValue(e.target.value)} value={filterValue}>
           <option value="none" >None</option>
           {valueOptions.map((value) => <option key={value} value={value}>{value}</option>)}
         </select>
       </div>
+      <div>
+        <label className="mb-2">&nbsp;</label>
+        <button className="d-block btn btn-light" disabled={!filterType || !filterValue}>Apply filter</button>
+      </div>
     </div>
-    <button className="btn btn-light btn-sm mx-3" disabled={!filterType || !filterValue}>Apply filter</button>
   </form>;
 }

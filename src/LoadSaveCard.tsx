@@ -93,6 +93,23 @@ export function LoadSaveCard({ onSaveLoaded }: { onSaveLoaded: (save: DemoSave) 
             <span className="btn-sm" style={{ display: "inline-block", lineHeight: "1.5", verticalAlign: "middle" }}>Discord: <b>gamebuster800#2213</b></span>
           </small>
         </div>
+        <div className="text-muted" style={{ fontFamily: "monospace", fontSize: "10pt" }}>
+          <p>
+            <b>Changelog</b>
+          </p>
+          <p>
+            <b>2023-03-11</b>
+          </p>
+          <p>
+            Thank you for using this tool. You can request features or bugfixes via Github!
+            We're not playing Timberborn ourselves at this moment, so please do let us know
+            about any issues!
+          </p>
+          <ul>
+            <li>Change "Finish" behavior to prevent the game from crashing sometimes</li>
+            <li>Add "Finish All" button</li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>

@@ -56,6 +56,9 @@ export const ConstructionUtil = {
   },
   finishConstruction: (constructionSite: ConstructibleEntity): void => {
     constructionSite.Components.Constructible.Finished = true;
+    if (constructionSite.Components.ConstructionSite) {
+      constructionSite.Components.ConstructionSite.BuildTimeProgressInHoursKey = 1;
+    }
   },
   finishAllConstruction: (saveData: DemoSave): void => {
     saveData.Entities.forEach((entity) => {
