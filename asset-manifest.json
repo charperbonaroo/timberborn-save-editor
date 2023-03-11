@@ -1,22 +1,22 @@
 {
   "files": {
     "main.css": "/timberborn-save-editor/static/css/main.cfc02d42.chunk.css",
-    "main.js": "/timberborn-save-editor/static/js/main.8ce773d4.chunk.js",
-    "main.js.map": "/timberborn-save-editor/static/js/main.8ce773d4.chunk.js.map",
+    "main.js": "/timberborn-save-editor/static/js/main.cc08e8ed.chunk.js",
+    "main.js.map": "/timberborn-save-editor/static/js/main.cc08e8ed.chunk.js.map",
     "runtime-main.js": "/timberborn-save-editor/static/js/runtime-main.58795de1.js",
     "runtime-main.js.map": "/timberborn-save-editor/static/js/runtime-main.58795de1.js.map",
-    "static/js/2.b105e43f.chunk.js": "/timberborn-save-editor/static/js/2.b105e43f.chunk.js",
-    "static/js/2.b105e43f.chunk.js.map": "/timberborn-save-editor/static/js/2.b105e43f.chunk.js.map",
+    "static/js/2.d91595c1.chunk.js": "/timberborn-save-editor/static/js/2.d91595c1.chunk.js",
+    "static/js/2.d91595c1.chunk.js.map": "/timberborn-save-editor/static/js/2.d91595c1.chunk.js.map",
     "static/js/3.1c49b345.chunk.js": "/timberborn-save-editor/static/js/3.1c49b345.chunk.js",
     "static/js/3.1c49b345.chunk.js.map": "/timberborn-save-editor/static/js/3.1c49b345.chunk.js.map",
     "index.html": "/timberborn-save-editor/index.html",
     "static/css/main.cfc02d42.chunk.css.map": "/timberborn-save-editor/static/css/main.cfc02d42.chunk.css.map",
-    "static/js/2.b105e43f.chunk.js.LICENSE.txt": "/timberborn-save-editor/static/js/2.b105e43f.chunk.js.LICENSE.txt"
+    "static/js/2.d91595c1.chunk.js.LICENSE.txt": "/timberborn-save-editor/static/js/2.d91595c1.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
     "static/js/runtime-main.58795de1.js",
-    "static/js/2.b105e43f.chunk.js",
+    "static/js/2.d91595c1.chunk.js",
     "static/css/main.cfc02d42.chunk.css",
-    "static/js/main.8ce773d4.chunk.js"
+    "static/js/main.cc08e8ed.chunk.js"
   ]
 }
